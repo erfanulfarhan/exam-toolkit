@@ -2,20 +2,106 @@
 @tailwind components;
 @tailwind utilities;
 
-:root { color-scheme: dark; }
-html, body, #root { min-height: 100%; }
+:root {
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
 body {
   margin: 0;
-  background: radial-gradient(1200px 700px at 15% -10%, rgba(79,140,255,.12), transparent 60%),
-              radial-gradient(1000px 600px at 100% 0%, rgba(124,108,255,.10), transparent 55%),
-              #0a0b10;
+  background: #07080d;
   color: #eef1f8;
   font-family: Inter, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
-::selection { background: #4f8cff; color: #fff; }
-input, select, button { font: inherit; }
-/* hide number input spinners for a cleaner look */
-input[type=number]::-webkit-outer-spin-button,
-input[type=number]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-input[type=number] { -moz-appearance: textfield; }
+
+/* Layered mesh gradient, the page's only decoration, fixed so it never
+   scrolls out from under the content. Cool at the top, warm as you scroll,
+   so the page moves through the spectrum rather than sitting in one hue. */
+.mesh {
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(54rem 32rem at 10% -14%, rgba(34, 211, 238, 0.18), transparent 60%),
+    radial-gradient(48rem 30rem at 46% -12%, rgba(79, 140, 255, 0.20), transparent 58%),
+    radial-gradient(44rem 30rem at 94% -6%, rgba(167, 139, 250, 0.20), transparent 58%),
+    radial-gradient(40rem 28rem at 86% 34%, rgba(244, 114, 182, 0.13), transparent 60%),
+    radial-gradient(44rem 30rem at 4% 46%, rgba(45, 212, 191, 0.11), transparent 60%),
+    radial-gradient(46rem 30rem at 70% 76%, rgba(251, 191, 36, 0.09), transparent 62%),
+    radial-gradient(50rem 34rem at 14% 92%, rgba(251, 113, 133, 0.10), transparent 62%);
+}
+
+/* Very fine noise keeps the large flat gradients from banding. */
+.grain {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+::selection {
+  background: #4f8cff;
+  color: #fff;
+}
+
+input,
+select,
+button,
+textarea {
+  font: inherit;
+}
+
+/* Hide number spinners, since the max is shown in the placeholder instead. */
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type='number'] {
+  -moz-appearance: textfield;
+}
+
+select option {
+  background: #12141c;
+  color: #eef1f8;
+}
+
+*:focus-visible {
+  outline: 2px solid rgba(79, 140, 255, 0.7);
+  outline-offset: 2px;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #262a3a;
+  border-radius: 99px;
+  border: 3px solid #07080d;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #333850;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
