@@ -5,9 +5,11 @@ import { Card, Chip, Meter, Segmented, Select, TONES } from '@/components/ui'
 import { EFFORT_LABELS, IalView } from '@/lib/types'
 
 export function Planner({
-  view, onTarget, onEffort,
+  view, target, effort, onTarget, onEffort,
 }: {
   view: IalView
+  target?: string
+  effort: Record<string, number>
   onTarget: (grade: string) => void
   onEffort: (code: string, value: number) => void
 }) {
@@ -30,7 +32,7 @@ export function Planner({
         <Segmented
           id="plan-target"
           tone="amber"
-          value={view.target}
+          value={target ?? view.target}
           onChange={onTarget}
           options={ladder.map((g) => ({ value: g, label: g }))}
         />
@@ -129,7 +131,7 @@ export function Planner({
                       {u.title}
                     </span>
                     <Select
-                      value={u.effort}
+                      value={effort[u.code] ?? u.effort}
                       onChange={(e) => onEffort(u.code, Number(e.target.value))}
                       className="h-8 w-32 shrink-0 text-xs"
                     >

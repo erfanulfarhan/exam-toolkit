@@ -1,8 +1,8 @@
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { LineChart } from 'lucide-react'
 import { Card, Field, Select } from '@/components/ui'
 import { BoundaryChart } from '@/components/BoundaryChart'
-import { useApi } from '@/lib/api'
+import { useApiGet } from '@/lib/apiGet'
 import { ForecastView } from '@/lib/types'
 
 const CAPTION =
@@ -13,8 +13,7 @@ const CAPTION =
 
 export function IalForecast({ subject }: { subject: string }) {
   const [code, setCode] = useState<string | undefined>()
-  const body = useMemo(() => ({ qual: 'IAL', subject, code }), [subject, code])
-  const { data } = useApi<ForecastView>('/api/forecast', body, 120)
+  const data = useApiGet<ForecastView>('/api/forecast', { qual: 'IAL', subject, code })
 
   if (!data || !data.series.length) return null
 
@@ -36,8 +35,7 @@ export function IalForecast({ subject }: { subject: string }) {
 }
 
 export function IgcseForecast({ subject, papers }: { subject: string; papers: string | null }) {
-  const body = useMemo(() => ({ qual: 'IGCSE', subject, papers }), [subject, papers])
-  const { data } = useApi<ForecastView>('/api/forecast', body, 120)
+  const data = useApiGet<ForecastView>('/api/forecast', { qual: 'IGCSE', subject, papers })
 
   if (!data || !data.series.length) return null
 

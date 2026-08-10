@@ -35,6 +35,17 @@ def tidy(name):
     return name.strip()
 
 
+# Spelling slips in Pearson's own unit titles. Titles only; no number is ever
+# rewritten. Keep this list tiny and obvious.
+TITLE_FIXES = {"Introducttion": "Introduction"}
+
+
+def fix_title(title):
+    for wrong, right in TITLE_FIXES.items():
+        title = title.replace(wrong, right)
+    return title
+
+
 def is_subsequence(needle, haystack):
     it = iter(haystack)
     return all(ch in it for ch in needle)
@@ -90,6 +101,8 @@ def build_ial():
             else:
                 clean[name] = payload
         for payload in clean.values():
+            for unit in payload["units"]:
+                unit["title"] = fix_title(unit["title"])
             payload["units"].sort(key=lambda u: (u["code"], u.get("variant") or ""))
         out[label] = clean
         units = sum(len(v["units"]) for v in clean.values())

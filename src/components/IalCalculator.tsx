@@ -46,12 +46,12 @@ export function IalCalculator() {
         <Card className="p-5">
           <div className="grid sm:grid-cols-2 gap-4">
             <Field label="Subject">
-              <Select value={view.subject} onChange={(e) => reset(() => setSubject(e.target.value))}>
+              <Select value={subject ?? view.subject} onChange={(e) => reset(() => setSubject(e.target.value))}>
                 {view.subjects.map((s) => <option key={s}>{s}</option>)}
               </Select>
             </Field>
             <Field label="Exam session">
-              <Select value={view.session} onChange={(e) => { setSession(e.target.value); setRows({}) }}>
+              <Select value={session ?? view.session} onChange={(e) => { setSession(e.target.value); setRows({}) }}>
                 {view.sessions.map((s) => <option key={s}>{s}</option>)}
               </Select>
             </Field>
@@ -60,7 +60,7 @@ export function IalCalculator() {
             <Segmented<Level>
               id="ial-level"
               tone="violet"
-              value={view.level}
+              value={level}
               onChange={(v) => reset(() => setLevel(v))}
               options={[{ value: 'A Level', label: 'Full A Level' }, { value: 'AS', label: 'AS only' }]}
             />
@@ -94,6 +94,9 @@ export function IalCalculator() {
                 unit={u}
                 mode={mode}
                 value={rows[u.code]?.value ?? ''}
+                session={rows[u.code]?.session}
+                variant={rows[u.code]?.variant}
+                taking={taking[u.code]}
                 showTaking={view.hasOptional}
                 onTaking={(v) => setTaking((t) => ({ ...t, [u.code]: v }))}
                 onChange={(patch) =>
@@ -124,6 +127,8 @@ export function IalCalculator() {
         {view.ladder.length > 0 && (
           <Planner
             view={view}
+            target={target}
+            effort={effort}
             onTarget={setTarget}
             onEffort={(code, v) => setEffort((e) => ({ ...e, [code]: v }))}
           />
@@ -133,7 +138,7 @@ export function IalCalculator() {
       <div className="lg:sticky lg:top-24">
         <Card className="p-6 text-center">
           <div className="text-[11px] font-semibold uppercase tracking-[.09em] text-muted break-words">
-            {view.subject} · {view.level === 'AS' ? 'International AS' : 'International A Level'}
+            {subject ?? view.subject} · {level === 'AS' ? 'International AS' : 'International A Level'}
           </div>
           <AnimatePresence mode="popLayout">
             <motion.div
@@ -161,11 +166,11 @@ export function IalCalculator() {
                 What each grade needs
               </div>
               {view.ladder.map((g) => (
-                <div key={g.grade} className="flex items-center justify-between text-xs">
-                  <span className={'font-semibold ' + (GRADE_COLORS[g.grade] || '')}>{g.grade}</span>
-                  <span className="tabular-nums text-muted flex items-center gap-1.5">
-                    {g.need} UMS
-                    {g.reached && <Check size={12} className="text-emerald-400" />}
+                <div key={g.grade} className="flex items-baseline justify-between gap-2 text-xs">
+                  <span className={'font-semibold shrink-0 ' + (GRADE_COLORS[g.grade] || '')}>{g.grade}</span>
+                  <span className="tabular-nums text-muted flex items-baseline gap-1.5 text-right">
+                    {g.need} UMS{g.extra && <span className="text-muted/70">{g.extra}</span>}
+                    {g.reached && <Check size={12} className="text-emerald-400 self-center" />}
                   </span>
                 </div>
               ))}
@@ -189,20 +194,28 @@ export function IalCalculator() {
 }
 
 function UnitRow({
-  unit, mode, value, showTaking, onTaking, onChange,
+  unit, mode, value, session, variant, taking, showTaking, onTaking, onChange,
 }: {
   unit: IalUnitView
   mode: Mode
   value: string
+  session?: string
+  variant?: string
+  taking?: boolean
   showTaking: boolean
   onTaking: (v: boolean) => void
   onChange: (patch: { session?: string; variant?: string; value?: string }) => void
 }) {
+  // Prefer what the user just picked over what the last reply said, so the
+  // control never snaps back while the request is in flight.
+  const shownSession = session ?? unit.session
+  const shownVariant = variant ?? unit.variant
+  const isTaking = taking ?? unit.taking
   return (
     <div
       className={
         'rounded-2xl border px-3.5 py-3 transition-all ' +
-        (unit.taking ? 'border-line/70 bg-black/20' : 'border-line/40 bg-black/10 opacity-55')
+        (isTaking ? 'border-line/70 bg-black/20' : 'border-line/40 bg-black/10 opacity-55')
       }
     >
       <div className="grid sm:grid-cols-[minmax(0,1fr)_7rem_5.5rem] gap-x-4 gap-y-2 items-center">
@@ -210,7 +223,7 @@ function UnitRow({
           {showTaking && (
             <input
               type="checkbox"
-              checked={unit.taking}
+              checked={isTaking}
               onChange={(e) => onTaking(e.target.checked)}
               className="h-4 w-4 mt-0.5 rounded border-line bg-black/40 accent-violet-500 cursor-pointer shrink-0"
               aria-label={`Taking ${unit.code}`}
@@ -254,13 +267,13 @@ function UnitRow({
 
       <div className="grid grid-cols-2 gap-2.5 mt-3 pt-3 border-t border-line/50">
         <Field label="Session sat">
-          <Select value={unit.session} onChange={(e) => onChange({ session: e.target.value })} className="h-9 text-xs">
+          <Select value={shownSession} onChange={(e) => onChange({ session: e.target.value })} className="h-9 text-xs">
             {[...unit.sessions].reverse().map((s) => <option key={s}>{s}</option>)}
           </Select>
         </Field>
         {unit.variants.length > 1 && (
           <Field label="Paper version">
-            <Select value={unit.variant} onChange={(e) => onChange({ variant: e.target.value })} className="h-9 text-xs">
+            <Select value={shownVariant} onChange={(e) => onChange({ variant: e.target.value })} className="h-9 text-xs">
               {unit.variants.map((v) => <option key={v.key} value={v.key}>{v.label}</option>)}
             </Select>
           </Field>

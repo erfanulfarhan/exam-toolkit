@@ -31,7 +31,7 @@ export function IgcseCalculator() {
           <div className="grid sm:grid-cols-3 gap-4">
             <Field label="Subject">
               <Select
-                value={view.subject}
+                value={subject ?? view.subject}
                 onChange={(e) => { setSubject(e.target.value); setSession(undefined); setVariantIndex(undefined) }}
               >
                 {view.subjects.map((s) => <option key={s}>{s}</option>)}
@@ -39,14 +39,14 @@ export function IgcseCalculator() {
             </Field>
             <Field label="Exam session">
               <Select
-                value={view.session}
+                value={session ?? view.session}
                 onChange={(e) => { setSession(e.target.value); setVariantIndex(undefined) }}
               >
                 {[...view.sessions].reverse().map((s) => <option key={s}>{s}</option>)}
               </Select>
             </Field>
             <Field label="Papers or tier">
-              <Select value={view.variantIndex} onChange={(e) => setVariantIndex(Number(e.target.value))}>
+              <Select value={variantIndex ?? view.variantIndex} onChange={(e) => setVariantIndex(Number(e.target.value))}>
                 {view.variants.map((v, i) => <option key={i} value={i}>{v.label}</option>)}
               </Select>
             </Field>

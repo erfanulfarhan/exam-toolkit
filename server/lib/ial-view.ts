@@ -157,7 +157,14 @@ export function ialView(req: IalRequest): IalView {
   const ladderGrades = cashin ? gradeLadder(cashin, rule) : []
   const ladder = ladderGrades.map((g) => {
     const need = g === 'A*' ? cashin.ums['A'] : cashin.ums[g]
-    return { grade: g, need, reached: g === 'A*' ? overall === 'A*' : anyMarks && totalUms >= need }
+    return {
+      grade: g,
+      need,
+      // A* shares the A total, so spell out the extra condition or the two rows
+      // read as the same requirement.
+      extra: g === 'A*' && rule ? `plus ${rule.need} at ${rule.label}` : null,
+      reached: g === 'A*' ? overall === 'A*' : anyMarks && totalUms >= need,
+    }
   })
 
   const target = ladderGrades.includes(req.target || '') ? req.target! : (ladderGrades.includes('A') ? 'A' : ladderGrades[0])

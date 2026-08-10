@@ -7,14 +7,30 @@ import { useEffect, useRef, useState } from 'react'
  * numbers wait on the round trip, and the previous answer stays on screen while
  * the next one is in flight so nothing flickers.
  */
-export function useApi<T>(path: string, body: unknown, delay = 180) {
-  const [data, setData] = useState<T | null>(null)
-  const [error, setError] = useState(false)
-  const [busy, setBusy] = useState(true)
+/**
+ * Answers depend only on the request and the dataset, and the dataset only
+ * changes on deploy, so an exact repeat of a request can be replayed from
+ * memory. Going back to a state you have already seen costs nothing.
+ */
+const cache = new Map<string, unknown>()
+
+export function useApi<T>(path: string, body: unknown, delay = 80) {
   const key = JSON.stringify(body)
+  const cached = cache.get(`${path}:${key}`) as T | undefined
+  const [data, setData] = useState<T | null>(cached ?? null)
+  const [error, setError] = useState(false)
+  const [busy, setBusy] = useState(!cached)
   const first = useRef(true)
 
   useEffect(() => {
+    const hit = cache.get(`${path}:${key}`) as T | undefined
+    if (hit) {
+      setData(hit)
+      setError(false)
+      setBusy(false)
+      first.current = false
+      return
+    }
     let cancelled = false
     setBusy(true)
     const wait = first.current ? 0 : delay
@@ -27,6 +43,7 @@ export function useApi<T>(path: string, body: unknown, delay = 180) {
       })
         .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
         .then((d: T) => {
+          cache.set(`${path}:${key}`, d)
           if (cancelled) return
           setData(d)
           setError(false)

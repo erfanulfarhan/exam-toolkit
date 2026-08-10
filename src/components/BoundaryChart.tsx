@@ -18,7 +18,7 @@ const MUTED = '#9aa3b8'
 
 const W = 820
 const H = 360
-const PAD = { top: 18, right: 58, bottom: 38, left: 44 }
+const PAD = { top: 18, right: 58, bottom: 54, left: 44 }
 
 type Series = ForecastView['series'][number]
 
@@ -59,13 +59,15 @@ export function BoundaryChart({
   const ticks = niceTicks(lo, hi, 5)
   const forecastX = x(cols.length - 1)
 
-  // Space x labels by pixels, not by count, and step backwards from the last
-  // column so the forecast label is always shown and never lands on top of its
-  // neighbour (which is what happened on the full range).
+  // The last real session and the forecast sit one column apart, which is too
+  // close to label on one line. So the axis has two rows: real sessions on the
+  // upper row, spaced by pixels and stepping back from the newest, and the
+  // forecast alone on the lower row. Neither can collide with the other.
   const colWidth = (W - PAD.left - PAD.right) / Math.max(1, cols.length - 1)
   const labelStep = Math.max(1, Math.ceil(62 / Math.max(1, colWidth)))
+  const newest = cols.length - 2
   const labelled = new Set<number>()
-  for (let i = cols.length - 1; i >= 0; i -= labelStep) labelled.add(i)
+  for (let i = newest; i >= 0; i -= labelStep) labelled.add(i)
 
   return (
     <div>
@@ -91,6 +93,35 @@ export function BoundaryChart({
           {table ? 'Show chart' : 'Show table'}
         </button>
       </div>
+
+      {/* The readout lives here rather than floating over the plot, where it
+          used to sit on top of the grade labels at the right edge. */}
+      {!table && (
+        <div className="min-h-[26px] mb-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+          {hover == null ? (
+            <span className="text-muted/60">Hover the chart for the marks behind any session.</span>
+          ) : (
+            <>
+              <span className="font-semibold">
+                {cols[hover]}
+                {hover === cols.length - 1 && <span className="text-muted font-normal"> forecast</span>}
+              </span>
+              {series.map((s, si) => {
+                const v = hover === cols.length - 1
+                  ? s.point
+                  : s.history.find((h) => h.session === cols[hover])?.value
+                return (
+                  <span key={s.grade} className="inline-flex items-center gap-1 tabular-nums">
+                    <span className="h-2 w-2 rounded-full" style={{ background: RAMP[Math.min(si, RAMP.length - 1)] }} />
+                    <span className="text-muted">{s.label}</span>
+                    <span>{v ?? 'n/a'}</span>
+                  </span>
+                )
+              })}
+            </>
+          )}
+        </div>
+      )}
 
       {!table && (
         <div className="relative">
@@ -121,19 +152,26 @@ export function BoundaryChart({
 
             {cols.map((s, i) =>
               labelled.has(i) ? (
-                <text
-                  key={s}
-                  x={x(i)}
-                  y={H - PAD.bottom + 16}
-                  textAnchor="middle"
-                  fontSize={11}
-                  fill={i === cols.length - 1 ? '#eef1f8' : MUTED}
-                  fontWeight={i === cols.length - 1 ? 600 : 400}
-                >
+                <text key={s} x={x(i)} y={H - PAD.bottom + 17} textAnchor="middle" fontSize={11} fill={MUTED}>
                   {s}
                 </text>
               ) : null,
             )}
+            <text
+              x={forecastX}
+              y={H - PAD.bottom + 37}
+              textAnchor="end"
+              fontSize={11}
+              fontWeight={700}
+              fill="#eef1f8"
+            >
+              {target}
+            </text>
+            <line
+              x1={forecastX} x2={forecastX}
+              y1={H - PAD.bottom + 4} y2={H - PAD.bottom + 26}
+              stroke={GRID} strokeWidth={1}
+            />
 
             {series.map((s, si) => {
               const color = RAMP[Math.min(si, RAMP.length - 1)]
@@ -200,38 +238,6 @@ export function BoundaryChart({
           </svg>
           </div>
 
-          {/* The readout lives outside the scroller, and pins to the right edge
-              near the forecast column, so it is never clipped. */}
-          {hover != null && (
-            <div
-              className="pointer-events-none absolute top-2 w-max rounded-xl border border-line bg-card/95 backdrop-blur px-3 py-2 text-xs shadow-xl"
-              style={
-                x(hover) > W * 0.55
-                  ? { right: 4 }
-                  : { left: `${(x(hover) / W) * 100}%`, transform: 'translateX(14px)' }
-              }
-            >
-              <div className="font-semibold mb-1">
-                {cols[hover]}
-                {hover === cols.length - 1 && <span className="text-muted font-normal"> forecast</span>}
-              </div>
-              {series.map((s, si) => {
-                const v = hover === cols.length - 1
-                  ? s.point
-                  : s.history.find((h) => h.session === cols[hover])?.value
-                return (
-                  <div key={s.grade} className="flex items-center gap-2 tabular-nums">
-                    <span
-                      className="h-2 w-2 rounded-full shrink-0"
-                      style={{ background: RAMP[Math.min(si, RAMP.length - 1)] }}
-                    />
-                    <span className="text-muted w-6">{s.label}</span>
-                    <span>{v ?? 'n/a'}</span>
-                  </div>
-                )
-              })}
-            </div>
-          )}
         </div>
       )}
 

@@ -63,7 +63,7 @@ export type IalView = {
   maxUms: number
   overall: string
   anyMarks: boolean
-  ladder: { grade: string; need: number; reached: boolean }[]
+  ladder: { grade: string; need: number; extra: string | null; reached: boolean }[]
   rule: { label: string; need: number; have: number; note: string } | null
   target: string
   plan: Plan | null

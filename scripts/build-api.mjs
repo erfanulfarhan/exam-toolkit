@@ -7,9 +7,24 @@
  * and the boundary JSON is inlined rather than shipped as a separate asset.
  */
 import { build } from 'esbuild'
-import { mkdirSync, rmSync } from 'fs'
+import { mkdirSync, readFileSync, rmSync } from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
+
+/**
+ * esbuild inlines JSON as an object literal, which V8 parses far more slowly
+ * than the equivalent `JSON.parse` of a string. On a 684 KB dataset that is the
+ * difference between a sluggish cold start and a quick one.
+ */
+const fastJson = {
+  name: 'json-as-parse',
+  setup(b) {
+    b.onLoad({ filter: /\.json$/ }, (args) => {
+      const raw = JSON.stringify(readFileSync(args.path, 'utf8'))
+      return { contents: `export default JSON.parse(${raw})`, loader: 'js' }
+    })
+  },
+}
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const out = path.join(root, 'api')
@@ -17,7 +32,7 @@ const out = path.join(root, 'api')
 rmSync(out, { recursive: true, force: true })
 mkdirSync(out, { recursive: true })
 
-const handlers = ['ial', 'igcse', 'forecast']
+const handlers = ['ial', 'igcse', 'forecast', 'refresh']
 
 await Promise.all(handlers.map((name) =>
   build({
@@ -30,6 +45,7 @@ await Promise.all(handlers.map((name) =>
     minify: true,
     legalComments: 'none',
     logLevel: 'error',
+    plugins: [fastJson],
   })))
 
 console.log(`bundled ${handlers.length} api functions`)
