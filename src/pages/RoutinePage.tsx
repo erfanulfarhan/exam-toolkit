@@ -5,8 +5,9 @@ import { Card, Field, Meter, NumInput, Select, TONES } from '@/components/ui'
 import { useApi } from '@/lib/api'
 import { downloadIcs } from '@/lib/ics'
 import { RoutineView } from '@/lib/types'
+import { clock12 } from '@/lib/format'
 
-type Entry = { subject: string; examDate: string; units?: Record<string, number> }
+type Entry = { subject: string; examDate?: string; units?: Record<string, number> }
 
 const WEEK = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 const STORE = 'routine.v1'
@@ -17,7 +18,6 @@ const KIND: Record<string, { label: string; tone: keyof typeof TONES }> = {
 }
 
 const today = () => new Date().toISOString().slice(0, 10)
-const inDays = (n: number) => new Date(Date.now() + n * 86400000).toISOString().slice(0, 10)
 
 export function RoutinePage() {
   // No account, so the plan lives in this browser. Nothing is stored server side.
@@ -26,7 +26,7 @@ export function RoutinePage() {
       const saved = JSON.parse(localStorage.getItem(STORE) || 'null')
       if (saved?.entries?.length) return saved.entries
     } catch { /* fall through to the default */ }
-    return [{ subject: 'Chemistry', examDate: inDays(60) }]
+    return [{ subject: 'Chemistry' }]
   })
   const [hours, setHours] = useState<number[]>(() => {
     try {
@@ -36,15 +36,18 @@ export function RoutinePage() {
     return [3, 1.5, 1.5, 1.5, 1.5, 1, 3]
   })
   const [startHour, setStartHour] = useState(16)
+  const [series, setSeries] = useState<string>(() => {
+    try { return JSON.parse(localStorage.getItem(STORE) || 'null')?.series || 'Jun 2026' } catch { return 'Jun 2026' }
+  })
   const [tuning, setTuning] = useState<string | null>(null)
 
   useEffect(() => {
-    localStorage.setItem(STORE, JSON.stringify({ entries, hours }))
-  }, [entries, hours])
+    localStorage.setItem(STORE, JSON.stringify({ entries, hours, series }))
+  }, [entries, hours, series])
 
   const body = useMemo(
-    () => ({ subjects: entries, hours, startDate: today() }),
-    [entries, hours],
+    () => ({ subjects: entries, hours, startDate: today(), series }),
+    [entries, hours, series],
   )
   const { data: view, error } = useApi<RoutineView>('/api/routine', body, 250)
 
@@ -82,6 +85,13 @@ export function RoutinePage() {
           <Card className="p-5 space-y-4">
             <h2 className="font-display text-lg font-semibold tracking-tight">Subjects</h2>
 
+            <Field label="Exam series" hint="Exam dates fill in from Pearson's timetable.">
+              <Select value={series} onChange={(e) => setSeries(e.target.value)}>
+                {['Jun 2026', 'Oct 2026', 'Jan 2027', 'Jun 2027', 'Jun 2026 IGCSE', 'Nov 2026 IGCSE', 'Jun 2027 IGCSE']
+                  .map((s) => <option key={s}>{s}</option>)}
+              </Select>
+            </Field>
+
             {entries.map((entry, i) => (
               <div key={i} className="rounded-2xl border border-line/70 bg-black/20 p-3 space-y-2.5">
                 <div className="flex gap-2">
@@ -103,10 +113,10 @@ export function RoutinePage() {
                   )}
                 </div>
 
-                <Field label="Exam date">
+                <Field label="Exam date" hint={entry.examDate ? undefined : 'Set from the series'}>
                   <input
                     type="date"
-                    value={entry.examDate}
+                    value={entry.examDate || autoDate(view, entry.subject) || ''}
                     min={today()}
                     onChange={(e) => update(i, { examDate: e.target.value })}
                     className="h-10 w-full rounded-xl bg-black/25 border border-line px-3 text-sm text-ink outline-none focus:border-brand"
@@ -147,7 +157,7 @@ export function RoutinePage() {
 
             {entries.length < 6 && (
               <button
-                onClick={() => setEntries((e) => [...e, { subject: pickNext(view.subjects, e), examDate: inDays(60) }])}
+                onClick={() => setEntries((e) => [...e, { subject: pickNext(view.subjects, e) }])}
                 className="w-full h-10 rounded-xl border border-dashed border-line text-sm font-semibold text-muted hover:text-ink hover:border-line/60 transition-colors inline-flex items-center justify-center gap-1.5"
               >
                 <Plus size={15} /> Add a subject
@@ -203,7 +213,7 @@ export function RoutinePage() {
                   aria-label="Study start time"
                 >
                   {[8, 10, 12, 14, 15, 16, 17, 18, 19, 20].map((h) => (
-                    <option key={h} value={h}>{`${h}:00 start`}</option>
+                    <option key={h} value={h}>{`Start ${clock12(h)}`}</option>
                   ))}
                 </Select>
                 <button
@@ -260,13 +270,13 @@ export function RoutinePage() {
                       </div>
                     ))}
 
-                    {day.sessions.map((s, i) => (
+                    {blockTimes(day.sessions, startHour).map(({ s, at }, i) => (
                       <div key={i} className="mb-1 last:mb-0">
                         <div className={'text-[10px] font-mono leading-tight ' + TONES[KIND[s.kind].tone].text}>
                           {s.code}
                         </div>
                         <div className="text-[9px] text-muted leading-tight">
-                          {KIND[s.kind].label} · {s.minutes}m
+                          {at} · {KIND[s.kind].label}
                         </div>
                       </div>
                     ))}
@@ -306,6 +316,20 @@ function groupByWeek(days: RoutineView['days']) {
     out[out.length - 1].push(day)
   }
   return out
+}
+
+/** Clock time of each block, matching what the calendar export writes. */
+function blockTimes(sessions: RoutineView['days'][number]['sessions'], startHour: number) {
+  let cursor = startHour * 60
+  return sessions.map((s) => {
+    const at = clock12(Math.floor(cursor / 60) % 24, cursor % 60)
+    cursor += s.minutes + 15
+    return { s, at }
+  })
+}
+
+function autoDate(view: RoutineView, subject: string) {
+  return view.perSubject.find((s) => s.subject === subject)?.examDate
 }
 
 function pickNext(all: string[], chosen: Entry[]) {

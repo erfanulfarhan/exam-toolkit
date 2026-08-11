@@ -144,4 +144,35 @@ export type RoutineView = {
   perUnit: { subject: string; code: string; title: string; minutes: number; effort: number }[]
   warnings: string[]
   units: Record<string, { code: string; title: string; effort: number }[]>
+  series: string
+}
+
+export type Exam = {
+  code: string
+  paper: string
+  subject: string
+  title: string
+  date: string
+  session: 'Morning' | 'Afternoon'
+  minutes: number
+  daysAway: number
+  clash: boolean
+}
+
+export type ExamsView = {
+  seriesList: { label: string; qualification: string; first: string; last: string }[]
+  series: string
+  qualification: string
+  subjects: string[]
+  available: { code: string; paper: string; subject: string; title: string }[]
+  exams: Exam[]
+  summary: {
+    papers: number
+    minutes: number
+    first: string | null
+    last: string | null
+    daysToFirst: number | null
+    span: number | null
+  }
+  clashes: { date: string; session: string; codes: string[] }[]
 }

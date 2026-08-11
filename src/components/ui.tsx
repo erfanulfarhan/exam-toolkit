@@ -3,14 +3,20 @@ import { motion } from 'motion/react'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
-export function Card({ className, ...p }: React.HTMLAttributes<HTMLDivElement>) {
+export function Card({ className, spotlight, ...p }: React.HTMLAttributes<HTMLDivElement> & { spotlight?: boolean }) {
   return (
     <div
       className={cn(
-        'relative rounded-3xl border border-line/80 bg-card/50 backdrop-blur-xl',
-        'shadow-[0_1px_0_0_rgba(255,255,255,.04)_inset,0_24px_60px_-30px_rgba(0,0,0,.9)]',
+        'relative overflow-hidden rounded-3xl border border-line/80 bg-card/50 backdrop-blur-xl card-sheen',
+        'shadow-[0_1px_0_0_rgba(255,255,255,.05)_inset,0_30px_70px_-34px_rgba(0,0,0,.95)]',
+        spotlight && 'spotlight',
         className,
       )}
+      onPointerMove={spotlight ? (e) => {
+        const r = e.currentTarget.getBoundingClientRect()
+        e.currentTarget.style.setProperty('--mx', `${e.clientX - r.left}px`)
+        e.currentTarget.style.setProperty('--my', `${e.clientY - r.top}px`)
+      } : undefined}
       {...p}
     />
   )

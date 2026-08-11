@@ -1,6 +1,7 @@
 import { IAL } from './data'
 import { ialCurrentUnits, ialSubjects } from './engine'
 import { defaultEffort } from './difficulty'
+import { lastExamDate, seriesLabels } from './exams'
 
 /**
  * Study routine builder.
@@ -21,10 +22,12 @@ import { defaultEffort } from './difficulty'
  */
 
 export type RoutineRequest = {
-  subjects?: { subject: string; examDate: string; units?: Record<string, number> }[]
+  subjects?: { subject: string; examDate?: string; units?: Record<string, number> }[]
   /** Minutes available per weekday, Sunday first. */
   hours?: number[]
   startDate?: string
+  /** Exam series to take dates from when a subject has none set. */
+  series?: string
 }
 
 export type Session = {
@@ -52,6 +55,7 @@ export type RoutineView = {
   perUnit: { subject: string; code: string; title: string; minutes: number; effort: number }[]
   warnings: string[]
   units: Record<string, { code: string; title: string; effort: number }[]>
+  series: string
 }
 
 const WEEKDAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
@@ -86,11 +90,23 @@ export function buildRoutine(req: RoutineRequest): RoutineView {
   const chosen = (req.subjects || []).filter((s) => all.includes(s.subject)).slice(0, 6)
   const warnings: string[] = []
 
+  // An exam date left blank is filled from Pearson's published timetable, so a
+  // student only has to pick a series and their subjects.
+  const series = req.series && seriesLabels().includes(req.series) ? req.series : null
+  for (const entry of chosen) {
+    if (!entry.examDate && series) entry.examDate = lastExamDate(series, entry.subject) || ''
+  }
+  const missing = chosen.filter((s) => !s.examDate).map((s) => s.subject)
+  const usable = chosen.filter((s) => !!s.examDate)
+  if (missing.length) {
+    warnings.push(`No exam date for ${missing.join(', ')}. Set one, or pick a series that includes it.`)
+  }
+
   const units: RoutineView['units'] = {}
   for (const s of chosen) units[s.subject] = unitsForSubject(s.subject)
 
-  if (!chosen.length) {
-    return { subjects: all, days: [], totalMinutes: 0, perSubject: [], perUnit: [], warnings, units }
+  if (!usable.length) {
+    return { subjects: all, days: [], totalMinutes: 0, perSubject: [], perUnit: [], warnings, units, series: series || '' }
   }
 
   // Minutes available on each weekday, Sunday first.
@@ -99,19 +115,19 @@ export function buildRoutine(req: RoutineRequest): RoutineView {
   const perWeekday = hours.map((h) => Math.round(h * 60))
 
   const start = req.startDate ? new Date(req.startDate + 'T00:00:00Z') : new Date(iso(new Date()) + 'T00:00:00Z')
-  const examOf = new Map(chosen.map((s) => [s.subject, new Date(s.examDate + 'T00:00:00Z')]))
+  const examOf = new Map(usable.map((s) => [s.subject, new Date(s.examDate! + 'T00:00:00Z')]))
   const lastExam = new Date(Math.max(...[...examOf.values()].map((d) => d.getTime())))
 
   if (isNaN(lastExam.getTime()) || lastExam <= start) {
     warnings.push('Every exam date is in the past, so there is nothing to schedule.')
-    return { subjects: all, days: [], totalMinutes: 0, perSubject: [], perUnit: [], warnings, units }
+    return { subjects: all, days: [], totalMinutes: 0, perSubject: [], perUnit: [], warnings, units, series: series || '' }
   }
 
   // Build the empty calendar first: which days exist and how much fits in each.
   const days: Day[] = []
   for (let d = new Date(start); d <= lastExam; d = addDays(d, 1)) {
     const wd = d.getUTCDay()
-    const exams = chosen.filter((s) => s.examDate === iso(d)).map((s) => s.subject)
+    const exams = usable.filter((s) => s.examDate === iso(d)).map((s) => s.subject)
     days.push({
       date: iso(d),
       weekday: WEEKDAYS[wd],
@@ -130,7 +146,7 @@ export function buildRoutine(req: RoutineRequest): RoutineView {
   // Weight every unit. Effort 5 gets double the time of effort 1.
   type Slot = { subject: string; code: string; title: string; effort: number; weight: number; minutes: number; placed: number }
   const slots: Slot[] = []
-  for (const s of chosen) {
+  for (const s of usable) {
     for (const u of units[s.subject]) {
       const effort = s.units?.[u.code] ?? u.effort
       slots.push({
@@ -197,10 +213,10 @@ export function buildRoutine(req: RoutineRequest): RoutineView {
   })
 
   const totalMinutes = days.reduce((s, d) => s + d.minutes, 0)
-  const perSubject = chosen.map((s) => {
+  const perSubject = usable.map((s) => {
     const minutes = days.reduce(
       (sum, d) => sum + d.sessions.filter((x) => x.subject === s.subject).reduce((a, b) => a + b.minutes, 0), 0)
-    return { subject: s.subject, minutes, examDate: s.examDate, share: totalMinutes ? minutes / totalMinutes : 0 }
+    return { subject: s.subject, minutes, examDate: s.examDate!, share: totalMinutes ? minutes / totalMinutes : 0 }
   })
 
   const perUnit = slots
@@ -215,5 +231,5 @@ export function buildRoutine(req: RoutineRequest): RoutineView {
       'More hours a day, or an earlier start, would fix that.')
   }
 
-  return { subjects: all, days, totalMinutes, perSubject, perUnit, warnings, units }
+  return { subjects: all, days, totalMinutes, perSubject, perUnit, warnings, units, series: series || '' }
 }

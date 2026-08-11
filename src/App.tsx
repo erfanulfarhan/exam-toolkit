@@ -1,13 +1,18 @@
+import { Suspense, lazy } from 'react'
 import { ArrowUpRight, Layers } from 'lucide-react'
 import { Link, Router, useRouter } from '@/lib/router'
 import { Home } from '@/pages/Home'
 import { CalculatorPage } from '@/pages/CalculatorPage'
 import { RoutinePage } from '@/pages/RoutinePage'
+import { ExamsPage } from '@/pages/ExamsPage'
+// pdf.js is large, so the practice page loads only when someone opens it.
+const PracticePage = lazy(() => import('@/pages/PracticePage').then((m) => ({ default: m.PracticePage })))
 
 const NAV = [
   { to: '/calculator', label: 'Calculator' },
-  { to: '/practice', label: 'Practice' },
+  { to: '/exams', label: 'Timetable' },
   { to: '/routine', label: 'Routine' },
+  { to: '/practice', label: 'Practice' },
 ]
 
 export default function App() {
@@ -26,7 +31,7 @@ function Shell() {
       <div className="mesh" />
       <div className="grain" />
 
-      <header className="sticky top-0 z-30 border-b border-line/50 bg-bg/70 backdrop-blur-xl">
+      <header className="no-print sticky top-0 z-30 border-b border-line/50 bg-bg/70 backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
           <Link to="/" className="flex items-center gap-2.5 shrink-0">
             <span className="grid place-items-center h-9 w-9 rounded-xl bg-gradient-to-br from-teal-300 via-sky-500 to-fuchsia-500 text-white shadow-lg shadow-fuchsia-500/20">
@@ -58,7 +63,7 @@ function Shell() {
         <Route path={path} />
       </main>
 
-      <footer className="border-t border-line/50 mt-10">
+      <footer className="no-print border-t border-line/50 mt-10">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-7 text-xs text-muted flex flex-wrap gap-x-5 gap-y-2 justify-between">
           <p>Unofficial. Check anything that matters against your statement of results.</p>
           <a
@@ -78,7 +83,14 @@ function Shell() {
 function Route({ path }: { path: string }) {
   if (path === '/calculator') return <CalculatorPage />
   if (path === '/routine') return <RoutinePage />
-  if (path === '/practice') return <Soon path={path} />
+  if (path === '/exams') return <ExamsPage />
+  if (path === '/practice') {
+    return (
+      <Suspense fallback={<p className="text-muted py-16 text-center">Loading the paper viewer…</p>}>
+        <PracticePage />
+      </Suspense>
+    )
+  }
   if (path === '/') return <Home />
   return <NotFound />
 }

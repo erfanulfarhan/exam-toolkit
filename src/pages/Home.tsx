@@ -1,5 +1,5 @@
 import { motion } from 'motion/react'
-import { ArrowRight, CalendarRange, Calculator, FileText } from 'lucide-react'
+import { ArrowRight, CalendarCheck, CalendarRange, Calculator, FileText } from 'lucide-react'
 import { Card, TONES, Tone } from '@/components/ui'
 import { Link } from '@/lib/router'
 
@@ -29,8 +29,18 @@ const TOOLS: {
     title: 'Past paper practice',
     blurb:
       'Open a question paper beside its mark scheme. Each answer stays locked until you have attempted the question, so you cannot peek your way through a paper.',
-    points: ['Question by question or full paper', 'Mark scheme locked until you answer', 'Your marks feed the calculator'],
-    ready: false,
+    points: ['Question by question or full paper', 'Mark scheme locked until you answer', 'Your files never leave your device'],
+    ready: true,
+  },
+  {
+    to: '/exams',
+    tone: 'rose',
+    icon: <CalendarCheck size={20} />,
+    title: 'Exam timetable',
+    blurb:
+      'Tick your subjects and get only your papers, in order, with dates, sessions and durations, plus a countdown to the first one and any clashes flagged.',
+    points: ['From Pearson\'s published timetable', 'Clash detection', 'Feeds your routine automatically'],
+    ready: true,
   },
   {
     to: '/routine',
@@ -48,30 +58,30 @@ export function Home() {
   return (
     <>
       <motion.section
-        initial={{ opacity: 0, y: 10 }}
+        initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35 }}
+        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         className="mb-10 sm:mb-12"
       >
         <h1 className="font-display text-3xl sm:text-[3rem] font-bold tracking-tight leading-[1.08] max-w-3xl">
           Everything for Edexcel,{' '}
-          <span className="bg-gradient-to-r from-teal-300 via-sky-400 via-violet-400 to-amber-300 bg-clip-text text-transparent">
+          <span className="reveal-line bg-[linear-gradient(110deg,#5eead4,#38bdf8,#a78bfa,#fcd34d,#5eead4)] bg-clip-text text-transparent">
             in one place
           </span>
         </h1>
         <p className="text-muted mt-4 max-w-xl leading-relaxed">
-          Three tools for International A Level and International GCSE. Free, no account, no ads.
+          Four tools for International A Level and International GCSE. Free, no account, no ads.
           Pick one.
         </p>
       </motion.section>
 
-      <div className="grid md:grid-cols-3 gap-4">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {TOOLS.map((tool, i) => (
           <motion.div
             key={tool.to}
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.06 * i, duration: 0.35 }}
+            initial={{ opacity: 0, y: 22, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            transition={{ delay: 0.07 * i, type: 'spring', stiffness: 260, damping: 24 }}
           >
             <ToolCard {...tool} />
           </motion.div>
@@ -89,14 +99,18 @@ export function Home() {
 function ToolCard({ to, tone, icon, title, blurb, points, ready }: (typeof TOOLS)[number]) {
   const body = (
     <Card
+      spotlight={ready}
       className={
-        'group h-full p-5 flex flex-col transition-all ' +
-        (ready ? 'hover:border-line hover:-translate-y-0.5' : 'opacity-70')
+        'group h-full p-5 flex flex-col transition-all duration-300 ' +
+        (ready
+          ? 'hover:border-line hover:-translate-y-1 hover:shadow-[0_1px_0_0_rgba(255,255,255,.06)_inset,0_40px_80px_-40px_rgba(0,0,0,1)]'
+          : 'opacity-70')
       }
     >
       <span
         className={
           'grid place-items-center h-11 w-11 rounded-2xl bg-gradient-to-br text-white mb-4 ' +
+          'transition-transform duration-300 group-hover:scale-105 group-hover:-rotate-3 ' +
           TONES[tone].grad
         }
       >
