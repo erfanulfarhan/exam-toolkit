@@ -32,7 +32,7 @@ const out = path.join(root, 'api')
 rmSync(out, { recursive: true, force: true })
 mkdirSync(out, { recursive: true })
 
-const handlers = ['ial', 'igcse', 'forecast', 'refresh']
+const handlers = ['ial', 'igcse', 'forecast', 'refresh', 'routine']
 
 await Promise.all(handlers.map((name) =>
   build({

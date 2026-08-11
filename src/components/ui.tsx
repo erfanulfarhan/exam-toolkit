@@ -87,12 +87,12 @@ export function NumInput({ className, ...p }: React.InputHTMLAttributes<HTMLInpu
 
 /** Accent hues sections are tinted with, so each part of the page has its own. */
 export const TONES = {
-  brand: { text: 'text-sky-400', grad: 'from-sky-400 to-blue-500', soft: 'bg-sky-400/10 border-sky-400/25 text-sky-300' },
-  violet: { text: 'text-violet-300', grad: 'from-violet-400 to-fuchsia-500', soft: 'bg-violet-400/10 border-violet-400/25 text-violet-200' },
-  teal: { text: 'text-teal-300', grad: 'from-teal-300 to-emerald-500', soft: 'bg-teal-400/10 border-teal-400/25 text-teal-200' },
-  amber: { text: 'text-amber-300', grad: 'from-amber-300 to-orange-500', soft: 'bg-amber-400/10 border-amber-400/25 text-amber-200' },
-  rose: { text: 'text-rose-400', grad: 'from-rose-400 to-fuchsia-500', soft: 'bg-rose-400/10 border-rose-400/25 text-rose-200' },
-  emerald: { text: 'text-emerald-400', grad: 'from-emerald-400 to-teal-400', soft: 'bg-emerald-400/10 border-emerald-400/25 text-emerald-200' },
+  brand: { text: 'text-sky-400', grad: 'from-sky-400 to-blue-500', soft: 'bg-sky-400/10 border-sky-400/25 text-sky-300', dot: 'bg-sky-400' },
+  violet: { text: 'text-violet-300', grad: 'from-violet-400 to-fuchsia-500', soft: 'bg-violet-400/10 border-violet-400/25 text-violet-200', dot: 'bg-violet-400' },
+  teal: { text: 'text-teal-300', grad: 'from-teal-300 to-emerald-500', soft: 'bg-teal-400/10 border-teal-400/25 text-teal-200', dot: 'bg-teal-300' },
+  amber: { text: 'text-amber-300', grad: 'from-amber-300 to-orange-500', soft: 'bg-amber-400/10 border-amber-400/25 text-amber-200', dot: 'bg-amber-300' },
+  rose: { text: 'text-rose-400', grad: 'from-rose-400 to-fuchsia-500', soft: 'bg-rose-400/10 border-rose-400/25 text-rose-200', dot: 'bg-rose-400' },
+  emerald: { text: 'text-emerald-400', grad: 'from-emerald-400 to-teal-400', soft: 'bg-emerald-400/10 border-emerald-400/25 text-emerald-200', dot: 'bg-emerald-400' },
 } as const
 export type Tone = keyof typeof TONES
 

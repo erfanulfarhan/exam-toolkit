@@ -119,3 +119,29 @@ export const GRADE_COLORS: Record<string, string> = {
   '1': 'text-rose-500',
   U: 'text-rose-500',
 }
+
+export type Session = {
+  subject: string
+  code: string
+  title: string
+  minutes: number
+  kind: 'learn' | 'review' | 'paper'
+}
+
+export type RoutineDay = {
+  date: string
+  weekday: string
+  minutes: number
+  sessions: Session[]
+  exams: string[]
+}
+
+export type RoutineView = {
+  subjects: string[]
+  days: RoutineDay[]
+  totalMinutes: number
+  perSubject: { subject: string; minutes: number; examDate: string; share: number }[]
+  perUnit: { subject: string; code: string; title: string; minutes: number; effort: number }[]
+  warnings: string[]
+  units: Record<string, { code: string; title: string; effort: number }[]>
+}
