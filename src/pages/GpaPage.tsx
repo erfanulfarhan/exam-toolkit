@@ -7,6 +7,7 @@ import {
 } from '@/lib/gpa'
 import {
   AWARDS, CATEGORIES, Category, Department, UNIVERSITIES, Verdict, countAtLeast, departmentVerdict,
+  bestAcrossSittings,
 } from '@/lib/universities'
 import { suggest } from '@/lib/subjects'
 import { Link } from '@/lib/router'
@@ -15,6 +16,9 @@ import { Link } from '@/lib/router'
 const SUBJECT_HINTS = ['Mathematics', 'Physics', 'Chemistry', 'Biology', 'Economics', 'Accounting', 'Business', 'English']
 
 const STORE = 'gpa.entries'
+const SITTINGS = ['Jan', 'May/June', 'Oct/Nov']
+const THIS_YEAR = new Date().getFullYear()
+const YEARS = Array.from({ length: 9 }, (_, i) => String(THIS_YEAR + 1 - i))
 let nextId = 1
 const make = (level: Level, board: Board = 'edexcel'): Entry => ({
   id: nextId++,
@@ -71,7 +75,7 @@ export function GpaPage() {
         </p>
       </motion.section>
 
-      <div className="grid lg:grid-cols-2 gap-4 items-start">
+      <div className="relative z-20 grid lg:grid-cols-2 gap-4 items-start">
         <Panel
           level="o" title="O Level / IGCSE" entries={rows.o} counted={oBest}
           onAdd={(subject, board) => add('o', subject, board)} onUpdate={update} onRemove={remove}
@@ -156,7 +160,7 @@ function Panel({
   const isCounting = (e: Entry) => counted.counting.some((c) => c.id === e.id)
 
   return (
-    <Card className="p-4 sm:p-5 overflow-visible">
+    <Card className="p-4 sm:p-5 overflow-visible z-20">
       <div className="flex items-start justify-between gap-3 mb-4">
         <div className="min-w-0">
           <h2 className="font-display text-lg font-semibold tracking-tight">{title}</h2>
@@ -228,6 +232,26 @@ function Panel({
                   counts as {asLetter(entry)} · {pointsOf(entry).toFixed(2)} points
                 </span>
               )}
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2 mb-2.5">
+              <Select
+                value={entry.session ?? ''}
+                onChange={(e) => onUpdate(level, entry.id, { session: e.target.value || undefined })}
+                className="h-8 text-xs w-auto"
+              >
+                <option value="">Sitting</option>
+                {SITTINGS.map((m) => <option key={m} value={m}>{m}</option>)}
+              </Select>
+              <Select
+                value={entry.year ?? ''}
+                onChange={(e) => onUpdate(level, entry.id, { year: e.target.value || undefined })}
+                className="h-8 text-xs w-auto"
+              >
+                <option value="">Year</option>
+                {YEARS.map((y) => <option key={y} value={y}>{y}</option>)}
+              </Select>
+              <span className="text-[10px] text-muted/70">for award checks</span>
             </div>
 
             <div className="flex flex-wrap gap-1">
@@ -509,11 +533,12 @@ function Awards({ o, a }: { o: Entry[]; a: Entry[] }) {
     <>
       <div className="grid sm:grid-cols-2 gap-3">
         {AWARDS.map((award) => {
-          const checks = (award.needs ?? []).map((n) => ({
-            ...n,
-            have: countAtLeast(n.level === 'o' ? o : a, n.minGrade),
-          }))
+          const checks = (award.needs ?? []).map((n) => {
+            const run = bestAcrossSittings(n.level === 'o' ? o : a, n.minGrade, n.sessions)
+            return { ...n, have: run.best, undated: run.undated }
+          })
           const met = checks.length > 0 && checks.every((c) => c.have >= c.count)
+          const missingSittings = checks.some((c) => c.undated > 0)
           return (
             <Card key={award.name} className="p-4">
               <div className="flex items-start justify-between gap-2">
@@ -529,7 +554,7 @@ function Awards({ o, a }: { o: Entry[]; a: Entry[] }) {
                       ? 'bg-emerald-400/15 text-emerald-300 border-emerald-400/40'
                       : 'text-muted border-line')
                 }>
-                  {award.infoOnly ? 'Info only' : met ? 'Grades met' : 'Not yet'}
+                  {award.infoOnly ? 'Info only' : met ? 'Grades met' : missingSittings ? 'Sittings needed' : 'Not yet'}
                 </span>
               </div>
               <ul className="mt-2.5 space-y-1">
@@ -547,15 +572,18 @@ function Awards({ o, a }: { o: Entry[]; a: Entry[] }) {
                       <b className={c.have >= c.count ? 'text-emerald-300' : 'text-muted'}>
                         {c.have}/{c.count}
                       </b>
-                      <span className="text-muted"> at {c.minGrade} or above</span>
+                      <span className="text-muted">
+                        {' '}at {c.minGrade} or above in {c.sessions === 1 ? 'one sitting' : `${c.sessions} consecutive sittings`}
+                      </span>
                     </span>
                   ))}
                 </div>
               )}
               {!award.infoOnly && (
                 <p className="text-[11px] text-muted/80 mt-2 leading-relaxed">
-                  These awards are judged per exam session, which this check does not know, so treat a
-                  match as "worth applying" rather than won.
+                  {missingSittings
+                    ? 'Set the sitting on each subject above: these awards are judged per exam session, and subjects without one are left out of the count.'
+                    : 'Counted across your sittings as the awarding body does. Meeting it is worth applying on, not a win.'}
                 </p>
               )}
             </Card>

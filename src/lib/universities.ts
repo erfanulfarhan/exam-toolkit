@@ -506,7 +506,8 @@ export type Award = {
   criteria: string[]
   /** Marks-based awards cannot be judged from grades, so they are shown as notes. */
   infoOnly?: boolean
-  needs?: { level: 'o' | 'a'; count: number; minGrade: string }[]
+  /** `sessions` is how many consecutive sittings the count may be spread over. */
+  needs?: { level: 'o' | 'a'; count: number; minGrade: string; sessions: number }[]
 }
 
 export const AWARDS: Award[] = [
@@ -517,13 +518,13 @@ export const AWARDS: Award[] = [
       'Six A grades or above at O Level, across up to two consecutive sessions',
       'Three A grades or above at A Level, across up to two consecutive sessions',
     ],
-    needs: [{ level: 'o', count: 6, minGrade: 'A' }, { level: 'a', count: 3, minGrade: 'A' }],
+    needs: [{ level: 'o', count: 6, minGrade: 'A', sessions: 2 }, { level: 'a', count: 3, minGrade: 'A', sessions: 2 }],
   },
   {
     name: "British Council Scholars' Award",
     body: 'British Council Bangladesh',
     criteria: ['Nine A grades or above at O Level in a single session'],
-    needs: [{ level: 'o', count: 9, minGrade: 'A' }],
+    needs: [{ level: 'o', count: 9, minGrade: 'A', sessions: 1 }],
   },
   {
     name: 'Outstanding Pearson Learner Awards (OPLA)',
@@ -542,4 +543,43 @@ export const AWARDS: Award[] = [
 /** How many subjects reach a grade, used for the award checks. */
 export function countAtLeast(entries: Entry[], minGrade: string): number {
   return entries.filter((e) => e.grade && atLeast(asLetter(e), minGrade)).length
+}
+
+const SITTING_ORDER: Record<string, number> = { Jan: 0, 'May/June': 1, 'Oct/Nov': 2 }
+
+/**
+ * The best a student does in any run of consecutive sittings.
+ *
+ * These awards are judged per sitting, not over a whole career: nine A grades
+ * spread over three years is not the same as nine in one November. Sittings are
+ * put in calendar order and every window of the allowed length is scored, so a
+ * run that straddles two years counts exactly as the awarding bodies intend.
+ */
+export function bestAcrossSittings(
+  entries: Entry[], minGrade: string, windowSize: number,
+): { best: number; dated: number; undated: number } {
+  const qualifying = entries.filter((e) => e.grade && atLeast(asLetter(e), minGrade))
+  const dated = qualifying.filter((e) => e.session && e.year)
+  const undated = qualifying.length - dated.length
+
+  const counts = new Map<string, number>()
+  for (const e of dated) {
+    const key = `${e.year}-${SITTING_ORDER[e.session!] ?? 0}`
+    counts.set(key, (counts.get(key) ?? 0) + 1)
+  }
+  const sittings = [...counts.entries()]
+    .map(([key, n]) => ({ rank: Number(key.split('-')[0]) * 3 + Number(key.split('-')[1]), n }))
+    .sort((a, b) => a.rank - b.rank)
+
+  let best = 0
+  for (let i = 0; i < sittings.length; i++) {
+    let total = 0
+    for (let j = i; j < sittings.length; j++) {
+      // Only sittings that actually follow one another may be added together.
+      if (sittings[j].rank - sittings[i].rank > windowSize - 1) break
+      total += sittings[j].n
+    }
+    best = Math.max(best, total)
+  }
+  return { best, dated: dated.length, undated }
 }
