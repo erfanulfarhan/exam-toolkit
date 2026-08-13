@@ -83,17 +83,45 @@ export function Home() {
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         className="mb-10 sm:mb-12"
       >
-        <h1 className="font-display text-3xl sm:text-[3rem] font-bold tracking-tight leading-[1.08] max-w-3xl">
-          Everything for your exams,{' '}
-          <span className="reveal-line bg-[linear-gradient(110deg,#5eead4,#38bdf8,#a78bfa,#fcd34d,#5eead4)] bg-clip-text text-transparent">
-            in one place
+        <p className="text-[11px] font-semibold uppercase tracking-[.16em] text-[#68BA7F] mb-4">
+          Edexcel and Cambridge · International A Level and IGCSE
+        </p>
+        <h1 className="font-display text-4xl sm:text-[3.4rem] font-bold tracking-tight leading-[1.05] max-w-4xl">
+          Every past paper,{' '}
+          <span className="reveal-line bg-[linear-gradient(110deg,#CFFFDC,#68BA7F,#2E6F40,#8fd6a4,#CFFFDC)] bg-clip-text text-transparent">
+            marked honestly
           </span>
         </h1>
-        <p className="text-muted mt-4 max-w-xl leading-relaxed">
-          Past papers for Edexcel and Cambridge, grade and GPA tools for International A Level and
-          IGCSE, and a check on where your grades get you in. Free, no account, no ads.
+        <p className="text-muted mt-5 max-w-2xl text-lg leading-relaxed">
+          Thousands of question papers beside their mark schemes, a grade calculator built on the
+          real boundaries, and a check on which universities your grades open. Free, no account,
+          nothing to install.
+        </p>
+
+        <div className="flex flex-wrap items-center gap-3 mt-7">
+          <Link
+            to="/practice"
+            className="h-12 px-6 rounded-2xl bg-gradient-to-br from-[#CFFFDC] to-[#68BA7F] text-[#14251a] text-sm font-bold inline-flex items-center gap-2 hover:brightness-105 hover:-translate-y-0.5 transition-all shadow-lg shadow-[#2E6F40]/30"
+          >
+            Start practising <ArrowRight size={16} />
+          </Link>
+          <Link
+            to="/gpa"
+            className="h-12 px-6 rounded-2xl border border-line text-sm font-bold inline-flex items-center gap-2 hover:border-[#68BA7F]/60 hover:-translate-y-0.5 transition-all"
+          >
+            Where do my grades get me?
+          </Link>
+        </div>
+
+        <p className="text-xs text-muted/80 mt-6">
+          Built for students sitting Edexcel and Cambridge exams. Everything you enter stays in
+          your own browser.
         </p>
       </motion.section>
+
+      <h2 className="font-display text-lg font-semibold tracking-tight mb-4">
+        Six tools, all free
+      </h2>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {TOOLS.map((tool, i) => (

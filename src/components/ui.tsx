@@ -95,12 +95,12 @@ export function NumInput({ className, ...p }: React.InputHTMLAttributes<HTMLInpu
 
 /** Accent hues sections are tinted with, so each part of the page has its own. */
 export const TONES = {
-  brand: { text: 'text-sky-400', grad: 'from-sky-400 to-blue-500', soft: 'bg-sky-400/10 border-sky-400/25 text-sky-300', dot: 'bg-sky-400' },
-  violet: { text: 'text-violet-300', grad: 'from-violet-400 to-fuchsia-500', soft: 'bg-violet-400/10 border-violet-400/25 text-violet-200', dot: 'bg-violet-400' },
-  teal: { text: 'text-teal-300', grad: 'from-teal-300 to-emerald-500', soft: 'bg-teal-400/10 border-teal-400/25 text-teal-200', dot: 'bg-teal-300' },
-  amber: { text: 'text-amber-300', grad: 'from-amber-300 to-orange-500', soft: 'bg-amber-400/10 border-amber-400/25 text-amber-200', dot: 'bg-amber-300' },
-  rose: { text: 'text-rose-400', grad: 'from-rose-400 to-fuchsia-500', soft: 'bg-rose-400/10 border-rose-400/25 text-rose-200', dot: 'bg-rose-400' },
-  emerald: { text: 'text-emerald-400', grad: 'from-emerald-400 to-teal-400', soft: 'bg-emerald-400/10 border-emerald-400/25 text-emerald-200', dot: 'bg-emerald-400' },
+  brand: { text: 'text-[#68BA7F]', grad: 'from-[#68BA7F] to-[#2E6F40]', soft: 'bg-[#68BA7F]/10 border-[#68BA7F]/25 text-[#CFFFDC]', dot: 'bg-[#68BA7F]' },
+  violet: { text: 'text-[#CFFFDC]', grad: 'from-[#CFFFDC] to-[#68BA7F]', soft: 'bg-[#CFFFDC]/10 border-[#CFFFDC]/25 text-[#CFFFDC]', dot: 'bg-[#CFFFDC]' },
+  teal: { text: 'text-[#68BA7F]', grad: 'from-[#8fd6a4] to-[#2E6F40]', soft: 'bg-[#68BA7F]/10 border-[#68BA7F]/25 text-[#CFFFDC]', dot: 'bg-[#68BA7F]' },
+  amber: { text: 'text-[#CFFFDC]', grad: 'from-[#CFFFDC] to-[#68BA7F]', soft: 'bg-[#CFFFDC]/10 border-[#CFFFDC]/25 text-[#CFFFDC]', dot: 'bg-[#CFFFDC]' },
+  rose: { text: 'text-[#8fd6a4]', grad: 'from-[#68BA7F] to-[#253D2C]', soft: 'bg-[#68BA7F]/10 border-[#68BA7F]/25 text-[#CFFFDC]', dot: 'bg-[#8fd6a4]' },
+  emerald: { text: 'text-[#68BA7F]', grad: 'from-[#68BA7F] to-[#2E6F40]', soft: 'bg-[#68BA7F]/10 border-[#68BA7F]/25 text-[#CFFFDC]', dot: 'bg-[#68BA7F]' },
 } as const
 export type Tone = keyof typeof TONES
 

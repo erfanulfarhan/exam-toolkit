@@ -14,8 +14,8 @@ body,
 
 body {
   margin: 0;
-  background: #06070f;
-  color: #f1f4fb;
+  background: #141f18;
+  color: #e8fbee;
   font-family: Inter, system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -31,13 +31,13 @@ body {
   pointer-events: none;
   animation: drift 42s ease-in-out infinite alternate;
   background:
-    radial-gradient(54rem 32rem at 10% -14%, rgba(34, 211, 238, 0.30), transparent 60%),
-    radial-gradient(48rem 30rem at 46% -12%, rgba(99, 102, 241, 0.32), transparent 58%),
-    radial-gradient(44rem 30rem at 94% -6%, rgba(167, 139, 250, 0.32), transparent 58%),
-    radial-gradient(40rem 28rem at 86% 34%, rgba(244, 114, 182, 0.22), transparent 60%),
-    radial-gradient(44rem 30rem at 4% 46%, rgba(45, 212, 191, 0.20), transparent 60%),
-    radial-gradient(46rem 30rem at 70% 76%, rgba(251, 191, 36, 0.16), transparent 62%),
-    radial-gradient(50rem 34rem at 14% 92%, rgba(251, 113, 133, 0.18), transparent 62%);
+    radial-gradient(54rem 32rem at 10% -14%, rgba(104, 186, 127, 0.30), transparent 60%),
+    radial-gradient(48rem 30rem at 46% -12%, rgba(46, 111, 64, 0.42), transparent 58%),
+    radial-gradient(44rem 30rem at 94% -6%, rgba(104, 186, 127, 0.24), transparent 58%),
+    radial-gradient(40rem 28rem at 86% 34%, rgba(207, 255, 220, 0.10), transparent 60%),
+    radial-gradient(44rem 30rem at 4% 46%, rgba(46, 111, 64, 0.34), transparent 60%),
+    radial-gradient(46rem 30rem at 70% 76%, rgba(104, 186, 127, 0.18), transparent 62%),
+    radial-gradient(50rem 34rem at 14% 92%, rgba(37, 61, 44, 0.60), transparent 62%);
 }
 
 /* Very fine noise keeps the large flat gradients from banding. */
@@ -51,8 +51,8 @@ body {
 }
 
 ::selection {
-  background: #4f8cff;
-  color: #fff;
+  background: #68BA7F;
+  color: #10190f;
 }
 
 input,
