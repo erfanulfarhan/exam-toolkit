@@ -82,9 +82,7 @@ export function GpaPage() {
         />
       </div>
 
-      <h2 className="font-display text-xl font-semibold tracking-tight mt-8 mb-3">
-        Where you stand
-      </h2>
+      <Section title="Where you stand" tone="teal">
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {scales.map((s) => (
           <Card key={s.key} className="p-5">
@@ -121,10 +119,17 @@ export function GpaPage() {
           </Card>
         ))}
       </div>
+      </Section>
 
-      <Eligibility o={rows.o} a={rows.a} />
-      <Awards o={rows.o} a={rows.a} />
-      <Faq />
+      <Section title="University eligibility">
+        <Eligibility o={rows.o} a={rows.a} />
+      </Section>
+      <Section title="Award eligibility" tone="violet">
+        <Awards o={rows.o} a={rows.a} />
+      </Section>
+      <Section title="Frequently asked questions" tone="teal" defaultOpen={false}>
+        <Faq />
+      </Section>
 
       <p className="text-xs text-muted/80 mt-8 leading-relaxed max-w-3xl">
         Unofficial. Universities set their own rules, change them yearly, and most run an
@@ -502,7 +507,6 @@ function Eligibility({ o, a }: { o: Entry[]; a: Entry[] }) {
 function Awards({ o, a }: { o: Entry[]; a: Entry[] }) {
   return (
     <>
-      <h2 className="font-display text-xl font-semibold tracking-tight mt-8 mb-3">Award eligibility</h2>
       <div className="grid sm:grid-cols-2 gap-3">
         {AWARDS.map((award) => {
           const checks = (award.needs ?? []).map((n) => ({
@@ -666,6 +670,42 @@ function SubjectSearch({
   )
 }
 
+function Section({
+  title, tone = 'amber', defaultOpen = true, children,
+}: {
+  title: string
+  tone?: 'amber' | 'teal' | 'violet'
+  defaultOpen?: boolean
+  children: React.ReactNode
+}) {
+  const [open, setOpen] = useState(defaultOpen)
+  return (
+    <Card className="overflow-hidden mt-4">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="w-full flex items-center gap-2.5 p-4 text-left hover:bg-white/[0.03] transition-colors"
+      >
+        <span className={'h-2 w-2 rounded-full shrink-0 ' + TONES[tone].dot} />
+        <span className="flex-1 font-display font-semibold tracking-tight">{title}</span>
+        <ChevronDown size={17} className={'text-muted transition-transform ' + (open ? 'rotate-180' : '')} />
+      </button>
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1] }}
+            className="overflow-hidden"
+          >
+            <div className="px-4 pb-4">{children}</div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </Card>
+  )
+}
+
 const QA: { q: string; a: string }[] = [
   {
     q: 'How many of my subjects actually count?',
@@ -709,9 +749,6 @@ function Faq() {
   const [open, setOpen] = useState<number | null>(null)
   return (
     <>
-      <h2 className="font-display text-xl font-semibold tracking-tight mt-8 mb-3">
-        Frequently asked questions
-      </h2>
       <div className="space-y-2">
         {QA.map((item, i) => (
           <Card key={item.q} className="overflow-hidden">
