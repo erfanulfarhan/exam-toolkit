@@ -1,5 +1,5 @@
 import { motion } from 'motion/react'
-import { ArrowRight, CalendarCheck, CalendarRange, Calculator, FileText } from 'lucide-react'
+import { ArrowRight, CalendarCheck, CalendarRange, Calculator, FileText, GraduationCap } from 'lucide-react'
 import { Card, TONES, Tone } from '@/components/ui'
 import { Link } from '@/lib/router'
 
@@ -20,6 +20,16 @@ const TOOLS: {
     blurb:
       'Put in the UMS from your results slip and see your grade against the real boundaries, the raw mark behind it, and the easiest papers to re-sit.',
     points: ['Every session since 2014', 'A* rule built in', 'Next session forecast'],
+    ready: true,
+  },
+  {
+    to: '/gpa',
+    tone: 'emerald',
+    icon: <GraduationCap size={20} />,
+    title: 'GPA calculator',
+    blurb:
+      'Your O Level and A Level grades on the scales Bangladeshi universities actually use, and which departments they open at fifteen of them.',
+    points: ['Every university scores differently', 'Departments checked one by one', 'Award eligibility too'],
     ready: true,
   },
   {
@@ -70,12 +80,12 @@ export function Home() {
           </span>
         </h1>
         <p className="text-muted mt-4 max-w-xl leading-relaxed">
-          Past papers for Edexcel and Cambridge, plus grade tools for International A Level and IGCSE.
-          Free, no account, no ads.
+          Past papers for Edexcel and Cambridge, grade and GPA tools for International A Level and
+          IGCSE, and a check on where your grades get you in. Free, no account, no ads.
         </p>
       </motion.section>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {TOOLS.map((tool, i) => (
           <motion.div
             key={tool.to}
