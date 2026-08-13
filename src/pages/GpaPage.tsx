@@ -284,14 +284,69 @@ function Eligibility({ o, a }: { o: Entry[]; a: Entry[] }) {
     return { all: all.length, yes: all.filter((d) => d.verdict.eligible).length }
   }, [judged])
 
+  // Everything blocked by a single requirement, nearest first. A student is far
+  // better served by "one grade away from these eleven" than by a page of
+  // refusals, and it is the difference between a verdict and a plan.
+  const withinReach = useMemo(() => judged
+    .flatMap(({ uni, departments }) => departments
+      .filter((d) => !d.verdict.eligible && d.verdict.reasons.length === 1)
+      .map((d) => ({ uni, dept: d.dept, reason: d.verdict.reasons[0] })))
+    .slice(0, 8), [judged])
+
   const visible = (v: { dept: Department; verdict: Verdict }) =>
     (filter === 'all' || (filter === 'yes') === v.verdict.eligible)
     && (category === 'all' || v.dept.category === category)
 
   return (
     <>
+      {(totals.yes > 0 || withinReach.length > 0) && (
+        <div className="mt-8 rounded-2xl border border-line bg-gradient-to-br from-amber-400/[0.07] to-transparent p-5">
+          <div className="flex flex-wrap items-baseline gap-x-8 gap-y-3">
+            <div>
+              <div className={'font-display font-bold text-4xl leading-none ' + TONES.emerald.text}>
+                {totals.yes}
+              </div>
+              <div className="text-[11px] text-muted mt-1.5">departments open to you</div>
+            </div>
+            {withinReach.length > 0 && (
+              <div>
+                <div className={'font-display font-bold text-4xl leading-none ' + TONES.amber.text}>
+                  {withinReach.length}
+                </div>
+                <div className="text-[11px] text-muted mt-1.5">one requirement away</div>
+              </div>
+            )}
+          </div>
+
+          {withinReach.length > 0 && (
+            <div className="mt-4 pt-4 border-t border-line/60">
+              <div className="text-[10px] font-semibold uppercase tracking-[.12em] text-muted mb-2.5">
+                Within reach
+              </div>
+              <div className="space-y-1.5">
+                {withinReach.map(({ uni, dept: d, reason }) => {
+                  const subject = SUBJECT_HINTS.find((n) => reason.includes(n))
+                  return (
+                    <div key={uni.id + d.name} className="flex flex-wrap items-baseline gap-x-2 text-[13px]">
+                      <span className="font-semibold">{uni.short}</span>
+                      <span className="text-muted truncate">{d.name}</span>
+                      <span className="text-amber-300/90 text-[11px]">{reason}</span>
+                      {subject && (
+                        <Link to="/practice" className="text-teal-300 hover:text-teal-200 text-[11px] font-semibold">
+                          practise {subject} &rarr;
+                        </Link>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
       <h2 className="font-display text-xl font-semibold tracking-tight mt-8 mb-1">
-        What your grades open
+        Every department
       </h2>
       <p className="text-sm text-muted mb-3">
         {totals.yes} of {totals.all} departments across {UNIVERSITIES.length} universities. Where a
