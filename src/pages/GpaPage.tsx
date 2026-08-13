@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { motion } from 'motion/react'
+import { AnimatePresence, motion } from 'motion/react'
 import { Check, ChevronDown, Plus, Search, Trash2 } from 'lucide-react'
 import { Card, Select, TONES } from '@/components/ui'
 import {
@@ -290,13 +290,24 @@ function Eligibility({ o, a }: { o: Entry[]; a: Entry[] }) {
       .map((d) => ({ uni, dept: d.dept, reason: d.verdict.reasons[0] })))
     .slice(0, 8), [judged])
 
+  const entered = [...o, ...a].filter((e) => e.grade).length
+
   const visible = (v: { dept: Department; verdict: Verdict }) =>
     (filter === 'all' || (filter === 'yes') === v.verdict.eligible)
     && (category === 'all' || v.dept.category === category)
 
   return (
     <>
-      {(totals.yes > 0 || withinReach.length > 0) && (
+      {entered === 0 && (
+        <Card className="p-6 mt-8 text-center">
+          <p className="text-sm text-muted max-w-md mx-auto leading-relaxed">
+            Add your grades above and every department here is checked against them, with the
+            reason spelled out wherever you fall short.
+          </p>
+        </Card>
+      )}
+
+      {entered > 0 && (totals.yes > 0 || withinReach.length > 0) && (
         <div className="mt-8 rounded-2xl border border-line bg-gradient-to-br from-amber-400/[0.07] to-transparent p-5">
           <div className="flex flex-wrap items-baseline gap-x-8 gap-y-3">
             <div>
@@ -342,6 +353,8 @@ function Eligibility({ o, a }: { o: Entry[]; a: Entry[] }) {
         </div>
       )}
 
+      {entered > 0 && (
+      <>
       <h2 className="font-display text-xl font-semibold tracking-tight mt-8 mb-1">
         Every department
       </h2>
@@ -379,8 +392,11 @@ function Eligibility({ o, a }: { o: Entry[]; a: Entry[] }) {
         ))}
       </div>
 
+      </>
+      )}
+
       <div className="space-y-2">
-        {judged.map(({ uni, departments, passing }) => {
+        {entered > 0 && judged.map(({ uni, departments, passing }) => {
           const shown = departments.filter(visible)
           if (!shown.length) return null
           const open = openUni === uni.id
@@ -408,7 +424,15 @@ function Eligibility({ o, a }: { o: Entry[]; a: Entry[] }) {
                 <ChevronDown size={16} className={'shrink-0 text-muted transition-transform ' + (open ? 'rotate-180' : '')} />
               </button>
 
-              {open && (
+              <AnimatePresence initial={false}>
+                {open && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1] }}
+                  className="overflow-hidden"
+                >
                 <div className="px-4 pb-4 space-y-1.5">
                   {uni.note && <p className="text-xs text-muted leading-relaxed mb-2">{uni.note}</p>}
                   {shown.map(({ dept: d, verdict }) => (
@@ -463,7 +487,9 @@ function Eligibility({ o, a }: { o: Entry[]; a: Entry[] }) {
                     )}
                   </div>
                 </div>
-              )}
+                </motion.div>
+                )}
+              </AnimatePresence>
             </Card>
           )
         })}
@@ -600,8 +626,14 @@ function SubjectSearch({
           className="w-full h-10 pl-9 pr-3 rounded-xl border border-line bg-black/25 text-sm outline-none focus:border-amber-400/60 transition-colors"
         />
 
-        {open && (matches.length > 0 || query.trim()) && (
-          <div className="absolute z-20 left-0 right-0 top-12 rounded-xl border border-line bg-bg shadow-2xl overflow-hidden">
+        <AnimatePresence>
+          {open && (matches.length > 0 || query.trim()) && (
+          <motion.div
+            initial={{ opacity: 0, y: -8, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8, scale: 0.98 }}
+            transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1] }}
+            className="absolute z-20 left-0 right-0 top-12 rounded-xl border border-line bg-bg shadow-2xl overflow-hidden origin-top">
             {matches.map((name) => (
               <button
                 key={name}
@@ -626,8 +658,9 @@ function SubjectSearch({
                 <span className="truncate">Add &ldquo;{query.trim()}&rdquo; as a custom subject</span>
               </button>
             )}
-          </div>
-        )}
+          </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   )
@@ -692,9 +725,19 @@ function Faq() {
                 className={'shrink-0 text-muted transition-transform ' + (open === i ? 'rotate-180' : '')}
               />
             </button>
-            {open === i && (
-              <p className="px-4 pb-4 -mt-1 text-sm text-muted leading-relaxed max-w-3xl">{item.a}</p>
-            )}
+            <AnimatePresence initial={false}>
+              {open === i && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1] }}
+                  className="overflow-hidden"
+                >
+                  <p className="px-4 pb-4 -mt-1 text-sm text-muted leading-relaxed max-w-3xl">{item.a}</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </Card>
         ))}
       </div>
