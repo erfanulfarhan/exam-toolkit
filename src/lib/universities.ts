@@ -493,3 +493,53 @@ export const UNIVERSITIES: University[] = [
     ],
   },
 ]
+
+export const CATEGORIES: Category[] = [
+  'Engineering', 'Science', 'Business', 'Arts', 'Law',
+  'Pharmacy', 'Architecture', 'Social Science', 'Medical', 'General',
+]
+
+// ---- Awards ----
+export type Award = {
+  name: string
+  body: string
+  criteria: string[]
+  /** Marks-based awards cannot be judged from grades, so they are shown as notes. */
+  infoOnly?: boolean
+  needs?: { level: 'o' | 'a'; count: number; minGrade: string }[]
+}
+
+export const AWARDS: Award[] = [
+  {
+    name: 'The Daily Star O & A Level Awards',
+    body: 'The Daily Star',
+    criteria: [
+      'Six A grades or above at O Level, across up to two consecutive sessions',
+      'Three A grades or above at A Level, across up to two consecutive sessions',
+    ],
+    needs: [{ level: 'o', count: 6, minGrade: 'A' }, { level: 'a', count: 3, minGrade: 'A' }],
+  },
+  {
+    name: "British Council Scholars' Award",
+    body: 'British Council Bangladesh',
+    criteria: ['Nine A grades or above at O Level in a single session'],
+    needs: [{ level: 'o', count: 9, minGrade: 'A' }],
+  },
+  {
+    name: 'Outstanding Pearson Learner Awards (OPLA)',
+    body: 'Pearson Edexcel',
+    criteria: ['Awarded on exam marks, country-topper style, so it cannot be judged from grades alone'],
+    infoOnly: true,
+  },
+  {
+    name: 'Cambridge Outstanding Learner Awards',
+    body: 'Cambridge International',
+    criteria: ['Awarded on exam marks, country-topper style, so it cannot be judged from grades alone'],
+    infoOnly: true,
+  },
+]
+
+/** How many subjects reach a grade, used for the award checks. */
+export function countAtLeast(entries: Entry[], minGrade: string): number {
+  return entries.filter((e) => e.grade && atLeast(asLetter(e), minGrade)).length
+}
