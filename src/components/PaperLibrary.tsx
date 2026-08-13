@@ -107,7 +107,7 @@ export function PaperLibrary({ onOpen }: { onOpen: OnOpen }) {
             className="h-10 px-3 rounded-xl border border-line bg-black/25 text-sm outline-none focus:border-violet-400/60 transition-colors"
           />
           <button type="submit" disabled={!!busy || !password}
-            className="h-10 px-4 rounded-xl bg-gradient-to-br from-violet-400 to-fuchsia-500 text-white text-sm font-bold inline-flex items-center gap-2 hover:brightness-110 transition-all disabled:opacity-60">
+            className="h-10 px-4 rounded-xl bg-gradient-to-br from-[#0047AB] to-[#000080] text-white text-sm font-bold inline-flex items-center gap-2 hover:brightness-110 transition-all disabled:opacity-60">
             {busy || 'Unlock'}
           </button>
         </form>

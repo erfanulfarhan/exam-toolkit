@@ -20,7 +20,7 @@ export function CalculatorPage() {
       <motion.section {...fade} className="mb-7">
         <h1 className="font-display text-3xl sm:text-[2.75rem] font-bold tracking-tight leading-[1.1] max-w-2xl">
           Work out your grade, then{' '}
-          <span className="bg-gradient-to-r from-teal-300 via-sky-400 via-violet-400 to-amber-300 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-[#82C8E5] via-[#0047AB] to-[#000080] bg-clip-text text-transparent">
             plan your retakes
           </span>
         </h1>
