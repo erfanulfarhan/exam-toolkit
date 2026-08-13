@@ -388,8 +388,8 @@ function Eligibility({ o, a }: { o: Entry[]; a: Entry[] }) {
         Every department
       </h2>
       <p className="text-sm text-muted mb-3">
-        {totals.yes} of {totals.all} departments across {UNIVERSITIES.length} universities. Where a
-        subject grade is what stands in the way, the reason links to that subject's past papers.
+        {totals.yes} of {totals.all} departments across {UNIVERSITIES.length} universities, checked
+        against the grades above.
       </p>
 
       <div className="flex flex-wrap gap-1.5 mb-2">
@@ -482,25 +482,9 @@ function Eligibility({ o, a }: { o: Entry[]; a: Entry[] }) {
                       </div>
                       {!verdict.eligible && (
                         <ul className="mt-1.5 space-y-1">
-                          {verdict.reasons.map((r) => {
-                            // A shortfall in a named subject is something you can
-                            // still act on, so it links straight to that subject's
-                            // papers rather than leaving you at a dead end.
-                            const subject = SUBJECT_HINTS.find((n) => r.includes(n))
-                            return (
-                              <li key={r} className="text-[11px] text-rose-300/90 leading-relaxed">
-                                {r}
-                                {subject && (
-                                  <Link
-                                    to="/practice"
-                                    className="ml-1.5 text-teal-300 hover:text-teal-200 font-semibold whitespace-nowrap"
-                                  >
-                                    practise {subject} &rarr;
-                                  </Link>
-                                )}
-                              </li>
-                            )
-                          })}
+                          {verdict.reasons.map((r) => (
+                            <li key={r} className="text-[11px] text-rose-300/90 leading-relaxed">{r}</li>
+                          ))}
                         </ul>
                       )}
                       {d.notes && <p className="text-[11px] text-muted mt-1.5 leading-relaxed">{d.notes}</p>}
@@ -642,6 +626,10 @@ function SubjectSearch({
         ))}
         <span className="text-[10px] text-muted/70 hidden sm:inline">applies to what you add next</span>
       </div>
+      <p className="text-[11px] text-muted/80 mb-1.5">
+        Start typing to find a subject. If yours is not listed, type its name in full and add it as
+        your own.
+      </p>
 
       <div className="relative">
         <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
