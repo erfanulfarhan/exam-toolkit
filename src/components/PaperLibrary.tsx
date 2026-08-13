@@ -104,7 +104,7 @@ export function PaperLibrary({ onOpen }: { onOpen: OnOpen }) {
           <input
             type="password" value={password} onChange={(e) => setPassword(e.target.value)}
             placeholder="Library password" autoComplete="current-password"
-            className="h-10 px-3 rounded-xl border border-line bg-black/25 text-sm outline-none focus:border-violet-400/60 transition-colors"
+            className="h-10 px-3 rounded-xl border border-line bg-black/25 text-sm outline-none focus:border-[#82C8E5]/60 transition-colors"
           />
           <button type="submit" disabled={!!busy || !password}
             className="h-10 px-4 rounded-xl bg-gradient-to-br from-[#0047AB] to-[#000080] text-white text-sm font-bold inline-flex items-center gap-2 hover:brightness-110 transition-all disabled:opacity-60">
@@ -125,7 +125,7 @@ export function PaperLibrary({ onOpen }: { onOpen: OnOpen }) {
           className={
             'text-[11px] font-semibold px-2.5 py-1 rounded-lg border transition-colors ' +
             (withSolutions
-              ? 'bg-emerald-400/15 text-emerald-300 border-emerald-400/40'
+              ? 'bg-[#0047AB]/25 text-[#82C8E5] border-[#82C8E5]/40'
               : 'text-muted border-line hover:text-ink')
           }
           title="Only show papers that have a mark scheme"
@@ -141,7 +141,7 @@ export function PaperLibrary({ onOpen }: { onOpen: OnOpen }) {
             const boardOpen = openBoard === board
             return (
               <div key={board}>
-                <Row depth={0} icon={<FolderOpen size={16} className="text-amber-300" />}
+                <Row depth={0} icon={<FolderOpen size={16} className="text-[#82C8E5]" />}
                   label={board} bold accent chevron={boardOpen}
                   onClick={() => { setOpenBoard(boardOpen ? '' : board); setOpenLevel(''); setOpenPrefix('') }} />
                 {boardOpen && levelsOf(board).map((level) => {
@@ -220,7 +220,7 @@ function Row({
       <span className={
         'flex-1 truncate ' +
         (bold ? 'font-display font-semibold ' : 'text-sm ') +
-        (accent ? 'text-amber-300' : '')
+        (accent ? 'text-[#82C8E5]' : '')
       }>{label}</span>
       {count != null && <span className="text-[11px] text-muted">{count}</span>}
     </button>
@@ -242,9 +242,9 @@ function PaperRow({
       style={{ paddingLeft: 8 + 4 * 20 }}
     >
       <span className="font-semibold text-sm flex-1 truncate">{pair.unit}</span>
-      <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-teal-400/15 text-teal-300 border border-teal-400/30">QP</span>
+      <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-[#0047AB]/25 text-[#82C8E5] border border-[#0047AB]/50">QP</span>
       {pair.ms
-        ? <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-emerald-400/15 text-emerald-300 border border-emerald-400/30">MS</span>
+        ? <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-[#82C8E5]/15 text-[#82C8E5] border border-[#82C8E5]/40">MS</span>
         : <span className="text-[11px] px-2 py-0.5 rounded-md text-muted/60 border border-line inline-flex items-center gap-1"><TriangleAlert size={10} /> no MS</span>}
     </button>
   )
