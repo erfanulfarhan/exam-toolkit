@@ -86,18 +86,27 @@ function check(rule: Rule, o: Entry[], a: Entry[]): string | null {
       return null
     }
     case 'countAtGrade': {
-      const ok = counted.filter((e) => atLeast(asLetter(e), rule.minGrade)).length
-      if (ok < rule.count) {
-        return `${ok} of your ${counted.length} counted subjects are grade ${rule.minGrade} or above; at least ${rule.count} are needed`
+      const passing = counted.filter((e) => atLeast(asLetter(e), rule.minGrade))
+      if (passing.length >= rule.count) return null
+      // Name what is short rather than only counting it: "6 of 7" leaves a
+      // student hunting for the subject holding them back, and when the count
+      // covers every subject they have, one grade is the whole story.
+      const short = counted
+        .filter((e) => !atLeast(asLetter(e), rule.minGrade))
+        .map((e) => `${e.subject || 'a subject'} (${asLetter(e)})`)
+      if (short.length && short.length <= 3) {
+        return `${short.join(', ')} ${short.length === 1 ? 'is' : 'are'} below grade ${rule.minGrade}, and ${rule.count} of your counted subjects must reach it`
       }
-      return null
+      if (counted.length < rule.count) {
+        return `You have ${counted.length} counted subject${counted.length === 1 ? '' : 's'}; ${rule.count} at grade ${rule.minGrade} or above are needed`
+      }
+      return `${passing.length} of your ${counted.length} counted subjects are grade ${rule.minGrade} or above; at least ${rule.count} are needed`
     }
     case 'floor': {
       const below = counted.filter((e) => !atLeast(asLetter(e), rule.minGrade))
-      if (below.length) {
-        return `${below.length} of your ${counted.length} counted subjects are below grade ${rule.minGrade}, which this department does not accept`
-      }
-      return null
+      if (!below.length) return null
+      const named = below.map((e) => `${e.subject || 'a subject'} (${asLetter(e)})`)
+      return `${named.slice(0, 3).join(', ')}${named.length > 3 ? ` and ${named.length - 3} more` : ''} ${below.length === 1 ? 'is' : 'are'} below grade ${rule.minGrade}, which this department does not accept`
     }
     case 'aLevelCount': {
       const n = a.filter((e) => e.grade).length
