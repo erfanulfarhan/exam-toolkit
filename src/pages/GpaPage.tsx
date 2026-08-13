@@ -156,7 +156,7 @@ function Panel({
   const isCounting = (e: Entry) => counted.counting.some((c) => c.id === e.id)
 
   return (
-    <Card className="p-4 sm:p-5">
+    <Card className="p-4 sm:p-5 overflow-visible">
       <div className="flex items-start justify-between gap-3 mb-4">
         <div className="min-w-0">
           <h2 className="font-display text-lg font-semibold tracking-tight">{title}</h2>
@@ -637,7 +637,7 @@ function SubjectSearch({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.98 }}
             transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1] }}
-            className="absolute z-20 left-0 right-0 top-12 rounded-xl border border-line bg-bg shadow-2xl overflow-hidden origin-top">
+            className="absolute z-30 left-0 right-0 top-12 rounded-xl border border-line bg-bg shadow-2xl origin-top max-h-72 overflow-y-auto overscroll-contain">
             {matches.map((name) => (
               <button
                 key={name}
