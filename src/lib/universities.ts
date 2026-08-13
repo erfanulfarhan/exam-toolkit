@@ -1,0 +1,449 @@
+/**
+ * Which universities your grades open, and which they do not.
+ *
+ * A pass here means you clear a published minimum. It is not an offer. Almost
+ * every university in Bangladesh runs an admission test as well, public
+ * universities generally want a UGC equivalence certificate first, and popular
+ * departments fill up well above their stated minimum.
+ *
+ * Rules are expressed as small independent checks so a refusal can say exactly
+ * what was short, rather than a bare "not eligible".
+ */
+import { Entry, asLetter, best } from './gpa'
+
+export type Category =
+  | 'Engineering' | 'Science' | 'Business' | 'Arts' | 'Law'
+  | 'Pharmacy' | 'Architecture' | 'Social Science' | 'Medical' | 'General'
+
+export type Rule =
+  /** A named subject (or any one of several) at a level, at or above a grade. */
+  | { kind: 'subject'; anyOf: string[]; level: 'o' | 'a'; minGrade: string }
+  /** At least N counted subjects across both levels at or above a grade. */
+  | { kind: 'countAtGrade'; count: number; minGrade: string }
+  /** No counted subject may fall below a grade. */
+  | { kind: 'floor'; minGrade: string }
+  /** At least N A Level subjects sat. */
+  | { kind: 'aLevelCount'; count: number }
+  /** Average of the counted subjects at a level. */
+  | { kind: 'average'; level: 'o' | 'a'; min: number }
+
+export type Department = {
+  name: string
+  category: Category
+  rules: Rule[]
+  notes?: string
+}
+
+export type University = {
+  id: string
+  name: string
+  short: string
+  type: 'public' | 'private'
+  source?: string
+  admissionTest: boolean
+  equivalenceRequired: boolean
+  /** Applied to every department on top of its own rules. */
+  general: Rule[]
+  note?: string
+  departments: Department[]
+}
+
+const ORDER = ['A*', 'A', 'B', 'C', 'D', 'E', 'U']
+export function atLeast(grade: string, min: string): boolean {
+  const g = ORDER.indexOf(grade)
+  const m = ORDER.indexOf(min)
+  return g >= 0 && m >= 0 && g <= m
+}
+
+const norm = (s: string) => s.toLowerCase().replace(/[^a-z]/g, '')
+
+function gradeIn(entries: Entry[], names: string[]): string | null {
+  const wanted = names.map(norm)
+  const hits = entries
+    .filter((e) => e.grade && wanted.some((w) => norm(e.subject).includes(w)))
+    .map(asLetter)
+  if (!hits.length) return null
+  return hits.sort((a, b) => ORDER.indexOf(a) - ORDER.indexOf(b))[0]
+}
+
+export type Verdict = { eligible: boolean; reasons: string[] }
+
+function check(rule: Rule, o: Entry[], a: Entry[]): string | null {
+  const countedO = best(o, 'o').counting
+  const countedA = best(a, 'a').counting
+  const counted = [...countedO, ...countedA]
+
+  switch (rule.kind) {
+    case 'subject': {
+      const pool = rule.level === 'o' ? o : a
+      const label = rule.anyOf.join(' or ')
+      const level = rule.level === 'o' ? 'O Level' : 'A Level'
+      const held = gradeIn(pool, rule.anyOf)
+      if (!held) return `Missing required subject: ${label} at ${level}`
+      if (!atLeast(held, rule.minGrade)) {
+        return `${label} at ${level} is ${held}; minimum required is ${rule.minGrade}`
+      }
+      return null
+    }
+    case 'countAtGrade': {
+      const ok = counted.filter((e) => atLeast(asLetter(e), rule.minGrade)).length
+      if (ok < rule.count) {
+        return `${ok} of your ${counted.length} counted subjects are grade ${rule.minGrade} or above; at least ${rule.count} are needed`
+      }
+      return null
+    }
+    case 'floor': {
+      const below = counted.filter((e) => !atLeast(asLetter(e), rule.minGrade))
+      if (below.length) {
+        return `${below.length} of your ${counted.length} counted subjects are below grade ${rule.minGrade}, which this department does not accept`
+      }
+      return null
+    }
+    case 'aLevelCount': {
+      const n = a.filter((e) => e.grade).length
+      if (n < rule.count) return `You have ${n} A Level subject${n === 1 ? '' : 's'}; at least ${rule.count} are needed`
+      return null
+    }
+    case 'average': {
+      const gpa = rule.level === 'o' ? best(o, 'o').gpa : best(a, 'a').gpa
+      const label = rule.level === 'o' ? 'O Level' : 'A Level'
+      if (gpa < rule.min) return `${label} GPA is ${gpa.toFixed(2)}; ${rule.min.toFixed(2)} is required`
+      return null
+    }
+  }
+}
+
+export function departmentVerdict(uni: University, dept: Department, o: Entry[], a: Entry[]): Verdict {
+  const reasons: string[] = []
+  for (const rule of [...uni.general, ...dept.rules]) {
+    const problem = check(rule, o, a)
+    if (problem && !reasons.includes(problem)) reasons.push(problem)
+  }
+  return { eligible: reasons.length === 0, reasons }
+}
+
+// ---- Shorthand for the data below ----
+const subj = (names: string | string[], level: 'o' | 'a', minGrade: string): Rule =>
+  ({ kind: 'subject', anyOf: Array.isArray(names) ? names : [names], level, minGrade })
+const mathsPhysics = (minGrade: string): Rule[] => [
+  subj('Mathematics', 'a', minGrade), subj('Physics', 'a', minGrade),
+]
+const dept = (name: string, category: Category, rules: Rule[] = [], notes?: string): Department =>
+  ({ name, category, rules, notes })
+
+/** Engineering departments that share one rule, named in bulk. */
+const engineering = (names: string[], rules: Rule[]): Department[] =>
+  names.map((n) => dept(n, 'Engineering', rules))
+
+export const UNIVERSITIES: University[] = [
+  {
+    id: 'nsu',
+    name: 'North South University',
+    short: 'NSU',
+    type: 'private',
+    source: 'https://admissions.northsouth.edu/undergraduate_requirement',
+    admissionTest: true,
+    equivalenceRequired: false,
+    general: [{ kind: 'average', level: 'o', min: 2.5 }, { kind: 'average', level: 'a', min: 2.0 }],
+    note: 'Five O Levels averaging 2.5 and two A Levels averaging 2.0, on A = 5, B = 4, C = 3, D = 2, E = 1.',
+    departments: [
+      ...engineering(
+        ['Computer Science & Engineering (CSE)', 'Electrical & Electronic Engineering (EEE)', 'Civil & Environmental Engineering (CEE)'],
+        [subj('Mathematics', 'o', 'C'), subj('Physics', 'o', 'C'), subj(['Mathematics', 'Physics'], 'a', 'C')],
+      ),
+      dept('Architecture (B.Arch)', 'Architecture', [subj(['Mathematics', 'Physics'], 'a', 'C')]),
+      dept('Pharmacy (B.Pharm)', 'Pharmacy', [subj('Chemistry', 'a', 'B'), subj('Biology', 'a', 'B')]),
+      dept('Biochemistry & Microbiology (BMB)', 'Science', [subj('Biology', 'o', 'E'), subj('Chemistry', 'o', 'E')]),
+      dept('Business Administration (BBA)', 'Business'),
+      dept('Economics (BS)', 'Business'),
+    ],
+  },
+  {
+    id: 'brac',
+    name: 'BRAC University',
+    short: 'BRAC',
+    type: 'private',
+    source: 'https://www.bracu.ac.bd/admissions',
+    admissionTest: true,
+    equivalenceRequired: false,
+    general: [],
+    note: 'BRAC drops subjects graded E before averaging rather than scoring them a point.',
+    departments: [
+      ...engineering(['Computer Science & Engineering (CSE)', 'Electrical & Electronic Engineering (EEE)'],
+        [subj('Mathematics', 'a', 'C'), subj('Physics', 'a', 'C')]),
+      dept('Computer Science (CS)', 'Engineering', [subj('Mathematics', 'a', 'C')]),
+      dept('Architecture (B.Arch)', 'Architecture', [subj(['Mathematics', 'Physics'], 'a', 'C')]),
+      dept('Pharmacy (B.Pharm)', 'Pharmacy', [subj('Chemistry', 'a', 'B'), subj('Biology', 'a', 'B')]),
+      dept('Biotechnology (BTE)', 'Science', [subj('Biology', 'a', 'C'), subj('Chemistry', 'a', 'C')]),
+      dept('Business Administration (BBA)', 'Business'),
+      dept('Economics (BSS)', 'Business'),
+      dept('English (BA)', 'Arts'),
+      dept('Law (LL.B)', 'Law'),
+    ],
+  },
+  {
+    id: 'iub',
+    name: 'Independent University, Bangladesh',
+    short: 'IUB',
+    type: 'private',
+    source: 'https://www.iub.edu.bd/admissions',
+    admissionTest: true,
+    equivalenceRequired: false,
+    general: [],
+    departments: [
+      ...engineering(['Computer Science & Engineering (CSE)', 'Electrical & Electronic Engineering (EEE)', 'Electronics & Telecommunication Engineering (ETE)'],
+        [subj('Mathematics', 'a', 'C'), subj('Physics', 'a', 'C')]),
+      dept('Pharmacy (B.Pharm)', 'Pharmacy', [subj('Biology', 'o', 'C'), subj('Chemistry', 'a', 'C')]),
+      dept('Environmental Science (ES)', 'Science'),
+      dept('Business Administration (BBA)', 'Business'),
+    ],
+  },
+  {
+    id: 'aiub',
+    name: 'American International University-Bangladesh',
+    short: 'AIUB',
+    type: 'private',
+    source: 'https://www.aiub.edu/admission',
+    admissionTest: true,
+    equivalenceRequired: false,
+    general: [],
+    departments: [
+      ...engineering(['Computer Science & Engineering (CSE)', 'Electrical & Electronic Engineering (EEE)', 'Industrial & Production Engineering (IPE)', 'Computer Engineering (COE)'],
+        [subj('Mathematics', 'a', 'C')]),
+      dept('Architecture (B.Arch)', 'Architecture', [subj(['Mathematics', 'Physics'], 'a', 'C')]),
+      dept('Pharmacy (B.Pharm)', 'Pharmacy', [subj('Chemistry', 'a', 'B'), subj('Biology', 'a', 'B')]),
+      dept('Business Administration (BBA)', 'Business'),
+    ],
+  },
+  {
+    id: 'aust',
+    name: 'Ahsanullah University of Science & Technology',
+    short: 'AUST',
+    type: 'private',
+    source: 'https://www.aust.edu/admission',
+    admissionTest: true,
+    equivalenceRequired: false,
+    general: [],
+    note: 'AUST engineering looks at the O and A Level GPAs added together, asking for 7.00 or above.',
+    departments: [
+      ...engineering(['Computer Science & Engineering (CSE)', 'Electrical & Electronic Engineering (EEE)', 'Mechanical Engineering (ME)', 'Civil Engineering (CE)', 'Industrial & Production Engineering (IPE)', 'Textile Engineering (TE)'],
+        [...mathsPhysics('C')]),
+      dept('Architecture (B.Arch)', 'Architecture', [subj(['Mathematics', 'Physics'], 'a', 'C')]),
+      dept('Business Administration (BBA)', 'Business'),
+    ],
+  },
+  {
+    id: 'uiu',
+    name: 'United International University',
+    short: 'UIU',
+    type: 'private',
+    source: 'https://www.uiu.ac.bd/admissions',
+    admissionTest: true,
+    equivalenceRequired: false,
+    general: [],
+    departments: [
+      ...engineering(['Computer Science & Engineering (CSE)', 'Electrical & Electronic Engineering (BSEEE)', 'Civil Engineering (CE)', 'Data Science (BSDS)'],
+        [subj('Mathematics', 'a', 'C')]),
+      dept('Pharmacy (B.Pharm)', 'Pharmacy', [subj('Biology', 'o', 'C'), subj('Chemistry', 'a', 'C')]),
+      dept('General admission (all programmes)', 'General'),
+    ],
+  },
+  {
+    id: 'diu',
+    name: 'Daffodil International University',
+    short: 'DIU',
+    type: 'private',
+    source: 'https://daffodilvarsity.edu.bd/admission',
+    admissionTest: true,
+    equivalenceRequired: false,
+    general: [{ kind: 'countAtGrade', count: 7, minGrade: 'C' }],
+    departments: [
+      ...engineering(['Computer Science & Engineering (CSE)', 'Electrical & Electronic Engineering (EEE)', 'Civil Engineering (CE)'],
+        [subj('Physics', 'a', 'C'), subj('Mathematics', 'a', 'C')]),
+      dept('Pharmacy (B.Pharm)', 'Pharmacy', [subj('Biology', 'o', 'C')]),
+      dept('General admission (all programmes, including Law and BBA)', 'General'),
+    ],
+  },
+  {
+    id: 'ulab',
+    name: 'University of Liberal Arts Bangladesh',
+    short: 'ULAB',
+    type: 'private',
+    source: 'https://ulab.edu.bd/admission',
+    admissionTest: true,
+    equivalenceRequired: false,
+    general: [],
+    departments: [
+      ...engineering(['Computer Science & Engineering (CSE)', 'Electrical & Electronic Engineering (EEE)', 'Electronics & Telecommunication Engineering (ETE)'],
+        [subj('Mathematics', 'a', 'D')]),
+      dept('General admission (all programmes)', 'General'),
+    ],
+  },
+  {
+    id: 'buet',
+    name: 'Bangladesh University of Engineering & Technology',
+    short: 'BUET',
+    type: 'public',
+    source: 'https://ugadmission.buet.ac.bd',
+    admissionTest: true,
+    equivalenceRequired: true,
+    general: [],
+    note: 'Admission is by written test. O and A Level applicants need a UGC equivalence certificate first.',
+    departments: [
+      ...engineering(['Computer Science & Engineering (CSE)', 'Electrical & Electronic Engineering (EEE)', 'Mechanical Engineering (ME)', 'Civil Engineering (CE)', 'Chemical Engineering (ChE)', 'Industrial & Production Engineering (IPE)', 'Materials & Metallurgical Engineering (MME)', 'Water Resources Engineering (WRE)', 'Naval Architecture & Marine Engineering (NAME)', 'Biomedical Engineering (BME)', 'Nanomaterials & Ceramic Engineering (NCE)', 'Urban & Regional Planning (URP)'],
+        [subj('Physics', 'a', 'B'), subj('Chemistry', 'a', 'B'), subj('Mathematics', 'a', 'B')]),
+      dept('Architecture (B.Arch)', 'Architecture', [subj('Physics', 'a', 'B'), subj('Mathematics', 'a', 'B')]),
+    ],
+  },
+  {
+    id: 'mist',
+    name: 'Military Institute of Science & Technology',
+    short: 'MIST',
+    type: 'public',
+    source: 'https://www.mist.ac.bd/admission',
+    admissionTest: true,
+    equivalenceRequired: true,
+    general: [],
+    departments: [
+      ...engineering(['Computer Science & Engineering (CSE)', 'Electrical, Electronic & Communication Engineering (EECE)', 'Mechanical Engineering (ME)', 'Civil Engineering (CE)', 'Aeronautical Engineering (AE)', 'Nuclear Science & Engineering (NSE)'],
+        [subj('Physics', 'a', 'B'), subj('Chemistry', 'a', 'B'), subj('Mathematics', 'a', 'B')]),
+      dept('Biomedical Engineering (BME)', 'Engineering',
+        [{ kind: 'aLevelCount', count: 4 }, subj('Physics', 'a', 'B'), subj('Biology', 'a', 'B')]),
+      dept('Architecture (B.Arch)', 'Architecture', [subj('Physics', 'a', 'B'), subj('Mathematics', 'a', 'B')]),
+    ],
+  },
+  {
+    id: 'iut',
+    name: 'Islamic University of Technology',
+    short: 'IUT',
+    type: 'public',
+    source: 'https://www.iutoic-dhaka.edu/admission',
+    admissionTest: true,
+    equivalenceRequired: false,
+    general: [],
+    departments: [
+      dept('All BSc Engineering and BBA programmes', 'Engineering',
+        [subj('Physics', 'a', 'A'), subj('Chemistry', 'a', 'A'), subj('Mathematics', 'a', 'A')],
+        'IUT asks for high A Level grades across the science subjects.'),
+    ],
+  },
+  {
+    id: 'bup',
+    name: 'Bangladesh University of Professionals',
+    short: 'BUP',
+    type: 'public',
+    source: 'https://bup.edu.bd/admission',
+    admissionTest: true,
+    equivalenceRequired: true,
+    general: [],
+    note: 'BUP scores applicants on points: the O Level GPA and the A Level GPA each multiplied by five, needing 26.5 or above.',
+    departments: [
+      ...engineering(['Computer Science & Engineering (CSE)', 'Information & Communication Engineering (ICE)'],
+        [subj('Mathematics', 'a', 'C'), subj('Physics', 'a', 'C')]),
+      dept('Environmental Science (ES)', 'Science', [subj('Biology', 'a', 'C')]),
+      dept('Business Administration (BBA)', 'Business'),
+      dept('International Relations (IR)', 'Social Science'),
+      dept('Peace & Conflict Studies (PACS)', 'Social Science'),
+      dept('Law (LL.B)', 'Law'),
+      dept('English (BA)', 'Arts'),
+    ],
+  },
+  {
+    id: 'du',
+    name: 'University of Dhaka',
+    short: 'DU',
+    type: 'public',
+    source: 'https://admission.eis.du.ac.bd',
+    admissionTest: true,
+    equivalenceRequired: true,
+    general: [{ kind: 'floor', minGrade: 'C' }],
+    note: 'Admission is by unit test. O and A Level applicants apply through a UGC equivalence certificate.',
+    departments: [
+      dept('Science Unit', 'Science'),
+      dept('Business Studies Unit', 'Business'),
+      dept('Arts, Law & Social Science Unit', 'Arts'),
+      dept('Business Administration, IBA (BBA)', 'Business', [{ kind: 'countAtGrade', count: 7, minGrade: 'C' }]),
+    ],
+  },
+  {
+    id: 'ibaju',
+    name: 'Institute of Business Administration, Jahangirnagar University',
+    short: 'IBA-JU',
+    type: 'public',
+    source: 'https://juniv.edu',
+    admissionTest: true,
+    equivalenceRequired: true,
+    general: [],
+    departments: [
+      dept('Business Administration (BBA)', 'Business', [{ kind: 'countAtGrade', count: 7, minGrade: 'C' }]),
+    ],
+  },
+  {
+    id: 'dghs',
+    name: 'Government Medical Colleges (DGHS)',
+    short: 'Govt Medical',
+    type: 'public',
+    source: 'https://dgme.gov.bd',
+    admissionTest: true,
+    equivalenceRequired: true,
+    general: [],
+    note: 'Entry is by the national MBBS/BDS admission test, and only Physics, Chemistry and Biology count towards the A Level score.',
+    departments: [
+      dept('Bachelor of Medicine & Bachelor of Surgery (MBBS)', 'Medical',
+        [subj('Biology', 'a', 'C'), subj('Chemistry', 'a', 'C'), subj('Physics', 'a', 'C')]),
+      dept('Bachelor of Dental Surgery (BDS)', 'Medical',
+        [subj('Biology', 'a', 'C'), subj('Chemistry', 'a', 'C'), subj('Physics', 'a', 'C')]),
+    ],
+  },
+]
+
+export const CATEGORIES: Category[] = [
+  'Engineering', 'Science', 'Business', 'Arts', 'Law',
+  'Pharmacy', 'Architecture', 'Social Science', 'Medical', 'General',
+]
+
+// ---- Awards ----
+export type Award = {
+  name: string
+  body: string
+  criteria: string[]
+  /** Marks-based awards cannot be judged from grades, so they are shown as notes. */
+  infoOnly?: boolean
+  needs?: { level: 'o' | 'a'; count: number; minGrade: string }[]
+  link?: string
+}
+
+export const AWARDS: Award[] = [
+  {
+    name: 'The Daily Star O & A Level Awards',
+    body: 'The Daily Star',
+    criteria: [
+      'Six A grades or above at O Level, across up to two consecutive sessions',
+      'Three A grades or above at A Level, across up to two consecutive sessions',
+    ],
+    needs: [{ level: 'o', count: 6, minGrade: 'A' }, { level: 'a', count: 3, minGrade: 'A' }],
+  },
+  {
+    name: "British Council Scholars' Award",
+    body: 'British Council Bangladesh',
+    criteria: ['Nine A grades or above at O Level in a single session'],
+    needs: [{ level: 'o', count: 9, minGrade: 'A' }],
+  },
+  {
+    name: 'Outstanding Pearson Learner Awards (OPLA)',
+    body: 'Pearson Edexcel',
+    criteria: ['Awarded on exam marks, country-topper style, so it cannot be judged from grades alone'],
+    infoOnly: true,
+  },
+  {
+    name: 'Cambridge Outstanding Learner Awards',
+    body: 'Cambridge International',
+    criteria: ['Awarded on exam marks, country-topper style, so it cannot be judged from grades alone'],
+    infoOnly: true,
+  },
+]
+
+/** How many subjects reach a grade, used for the award checks. */
+export function countAtLeast(entries: Entry[], minGrade: string): number {
+  return entries.filter((e) => e.grade && atLeast(asLetter(e), minGrade)).length
+}

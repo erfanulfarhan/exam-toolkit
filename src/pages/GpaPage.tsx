@@ -5,6 +5,9 @@ import { Card, Select, TONES } from '@/components/ui'
 import {
   Board, COUNTS, Entry, Level, Scale, allScales, asLetter, best, gradesFor, pointsOf,
 } from '@/lib/gpa'
+import {
+  AWARDS, CATEGORIES, Category, Department, UNIVERSITIES, Verdict, countAtLeast, departmentVerdict,
+} from '@/lib/universities'
 
 const STORE = 'gpa.entries'
 let nextId = 1
@@ -114,6 +117,8 @@ export function GpaPage() {
         ))}
       </div>
 
+      <Eligibility o={rows.o} a={rows.a} />
+      <Awards o={rows.o} a={rows.a} />
       <Faq />
 
       <p className="text-xs text-muted/80 mt-8 leading-relaxed max-w-3xl">
@@ -259,30 +264,243 @@ function Panel({
   )
 }
 
+/**
+ * Every department, judged against the grades entered, grouped by university
+ * and filterable. A refusal always says what was short, because "not eligible"
+ * on its own tells a student nothing they can act on.
+ */
+function Eligibility({ o, a }: { o: Entry[]; a: Entry[] }) {
+  const [filter, setFilter] = useState<'all' | 'yes' | 'no'>('all')
+  const [category, setCategory] = useState<Category | 'all'>('all')
+  const [openUni, setOpenUni] = useState<string>('')
+
+  const judged = useMemo(() => UNIVERSITIES.map((uni) => {
+    const departments = uni.departments.map((d) => ({ dept: d, verdict: departmentVerdict(uni, d, o, a) }))
+    return { uni, departments, passing: departments.filter((d) => d.verdict.eligible).length }
+  }), [o, a])
+
+  const totals = useMemo(() => {
+    const all = judged.flatMap((u) => u.departments)
+    return { all: all.length, yes: all.filter((d) => d.verdict.eligible).length }
+  }, [judged])
+
+  const visible = (v: { dept: Department; verdict: Verdict }) =>
+    (filter === 'all' || (filter === 'yes') === v.verdict.eligible)
+    && (category === 'all' || v.dept.category === category)
+
+  return (
+    <>
+      <h2 className="font-display text-xl font-semibold tracking-tight mt-8 mb-1">University eligibility</h2>
+      <p className="text-sm text-muted mb-3">
+        {totals.yes} of {totals.all} departments across {UNIVERSITIES.length} universities, on the grades above.
+      </p>
+
+      <div className="flex flex-wrap gap-1.5 mb-2">
+        {([['all', `All ${totals.all}`], ['yes', `Eligible ${totals.yes}`], ['no', `Not eligible ${totals.all - totals.yes}`]] as const).map(([k, label]) => (
+          <button
+            key={k}
+            onClick={() => setFilter(k)}
+            className={
+              'h-8 px-3 rounded-lg text-xs font-semibold border transition-colors ' +
+              (filter === k ? 'border-amber-400/60 bg-amber-400/15 text-ink' : 'border-line text-muted hover:text-ink')
+            }
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+      <div className="flex flex-wrap gap-1.5 mb-4">
+        {(['all', ...CATEGORIES] as const).map((c) => (
+          <button
+            key={c}
+            onClick={() => setCategory(c as Category | 'all')}
+            className={
+              'h-7 px-2.5 rounded-lg text-[11px] font-semibold border transition-colors ' +
+              (category === c ? 'border-teal-400/60 bg-teal-400/15 text-ink' : 'border-line text-muted hover:text-ink')
+            }
+          >
+            {c === 'all' ? 'All subjects' : c}
+          </button>
+        ))}
+      </div>
+
+      <div className="space-y-2">
+        {judged.map(({ uni, departments, passing }) => {
+          const shown = departments.filter(visible)
+          if (!shown.length) return null
+          const open = openUni === uni.id
+          return (
+            <Card key={uni.id} className="overflow-hidden">
+              <button
+                onClick={() => setOpenUni(open ? '' : uni.id)}
+                className="w-full flex items-center gap-3 p-4 text-left hover:bg-white/[0.03] transition-colors"
+              >
+                <span className="h-9 w-9 shrink-0 grid place-items-center rounded-xl bg-white/[0.06] border border-line text-[11px] font-bold">
+                  {uni.short.slice(0, 4)}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="block font-semibold text-sm truncate">{uni.name}</span>
+                  <span className="block text-[11px] text-muted">
+                    {uni.type} · {passing} of {uni.departments.length} departments eligible
+                  </span>
+                </span>
+                <span className="hidden sm:block w-24 h-1.5 rounded-full bg-black/40 overflow-hidden shrink-0">
+                  <span
+                    className="block h-full rounded-full bg-gradient-to-r from-amber-300 to-orange-500"
+                    style={{ width: `${(passing / Math.max(1, uni.departments.length)) * 100}%` }}
+                  />
+                </span>
+                <ChevronDown size={16} className={'shrink-0 text-muted transition-transform ' + (open ? 'rotate-180' : '')} />
+              </button>
+
+              {open && (
+                <div className="px-4 pb-4 space-y-1.5">
+                  {uni.note && <p className="text-xs text-muted leading-relaxed mb-2">{uni.note}</p>}
+                  {shown.map(({ dept: d, verdict }) => (
+                    <div key={d.name} className="rounded-xl border border-line/60 bg-black/20 px-3 py-2.5">
+                      <div className="flex items-start gap-2">
+                        <div className="min-w-0 flex-1">
+                          <div className="text-sm font-semibold truncate">{d.name}</div>
+                          <div className="text-[11px] text-muted">{d.category}</div>
+                        </div>
+                        <span className={
+                          'shrink-0 text-[10px] font-bold px-2 py-1 rounded-md border ' +
+                          (verdict.eligible
+                            ? 'bg-emerald-400/15 text-emerald-300 border-emerald-400/40'
+                            : 'bg-rose-400/10 text-rose-300 border-rose-400/30')
+                        }>
+                          {verdict.eligible ? 'Eligible' : 'Not eligible'}
+                        </span>
+                      </div>
+                      {!verdict.eligible && (
+                        <ul className="mt-1.5 space-y-0.5">
+                          {verdict.reasons.map((r) => (
+                            <li key={r} className="text-[11px] text-rose-300/90 leading-relaxed">{r}</li>
+                          ))}
+                        </ul>
+                      )}
+                      {d.notes && <p className="text-[11px] text-muted mt-1.5 leading-relaxed">{d.notes}</p>}
+                    </div>
+                  ))}
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 pt-1 text-[11px] text-muted">
+                    {uni.admissionTest && <span>Admission test required</span>}
+                    {uni.equivalenceRequired && <span>UGC equivalence certificate needed</span>}
+                    {uni.source && (
+                      <a href={uni.source} target="_blank" rel="noopener noreferrer" className="text-teal-300 hover:text-teal-200 font-semibold">
+                        Official admissions page
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
+            </Card>
+          )
+        })}
+      </div>
+    </>
+  )
+}
+
+/** Grade-count awards can be judged here; marks-based ones can only be listed. */
+function Awards({ o, a }: { o: Entry[]; a: Entry[] }) {
+  return (
+    <>
+      <h2 className="font-display text-xl font-semibold tracking-tight mt-8 mb-3">Award eligibility</h2>
+      <div className="grid sm:grid-cols-2 gap-3">
+        {AWARDS.map((award) => {
+          const checks = (award.needs ?? []).map((n) => ({
+            ...n,
+            have: countAtLeast(n.level === 'o' ? o : a, n.minGrade),
+          }))
+          const met = checks.length > 0 && checks.every((c) => c.have >= c.count)
+          return (
+            <Card key={award.name} className="p-4">
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0">
+                  <div className="font-semibold text-sm">{award.name}</div>
+                  <div className="text-[11px] text-muted">{award.body}</div>
+                </div>
+                <span className={
+                  'shrink-0 text-[10px] font-bold px-2 py-1 rounded-md border ' +
+                  (award.infoOnly
+                    ? 'text-muted border-line'
+                    : met
+                      ? 'bg-emerald-400/15 text-emerald-300 border-emerald-400/40'
+                      : 'text-muted border-line')
+                }>
+                  {award.infoOnly ? 'Info only' : met ? 'Grades met' : 'Not yet'}
+                </span>
+              </div>
+              <ul className="mt-2.5 space-y-1">
+                {award.criteria.map((c) => (
+                  <li key={c} className="text-[11px] text-muted leading-relaxed flex gap-1.5">
+                    <span className="text-muted/50">·</span>{c}
+                  </li>
+                ))}
+              </ul>
+              {checks.length > 0 && (
+                <div className="mt-2.5 pt-2.5 border-t border-line/60 flex flex-wrap gap-x-4 gap-y-1">
+                  {checks.map((c) => (
+                    <span key={c.level} className="text-[11px] tabular-nums">
+                      <span className="text-muted">{c.level === 'o' ? 'O Level' : 'A Level'} </span>
+                      <b className={c.have >= c.count ? 'text-emerald-300' : 'text-muted'}>
+                        {c.have}/{c.count}
+                      </b>
+                      <span className="text-muted"> at {c.minGrade} or above</span>
+                    </span>
+                  ))}
+                </div>
+              )}
+              {!award.infoOnly && (
+                <p className="text-[11px] text-muted/80 mt-2 leading-relaxed">
+                  These awards are judged per exam session, which this check does not know, so treat a
+                  match as "worth applying" rather than won.
+                </p>
+              )}
+            </Card>
+          )
+        })}
+      </div>
+    </>
+  )
+}
+
 const QA: { q: string; a: string }[] = [
   {
     q: 'How many of my subjects actually count?',
-    a: 'Your best five O Levels and your best two A Levels, which is what most private universities average. Anything beyond that is kept on your list but cannot pull the number down, so there is no harm in adding every subject you sat.',
+    a: 'Seven: your five strongest O Levels and your two strongest A Levels. That is the set almost every Bangladeshi university means when its circular refers to "these 7 subjects". Sitting more than five O Levels only helps, because a strong sixth can displace a weaker one from your best five, and a weak one simply sits outside the count. A D in a sixth subject cannot make you ineligible anywhere when your best five are solid. A handful of places count differently and say so plainly: BUET and MIST work from three A Levels, and the government medical colleges take your A Level score from Physics, Chemistry and Biology only.',
   },
   {
     q: 'How is my Edexcel 9-1 grade converted?',
-    a: 'Numbers are read across to letters first, because universities score the letter. Following Edexcel\'s own comparability: 9 is A*, 8 and 7 are A, 6 and 5 are B, 4 is C, 3 is D and 2 is E. Each card shows the letter and the points it earned.',
+    a: 'It becomes a letter first, because that is what universities score. A 9 or an 8 is an A*, a 7 is an A, a 6 or a 5 is a B, a 4 is a C, a 3 is a D, a 2 is an E and a 1 is an F. Bangladeshi universities publish this table themselves, AUST prints it directly in its admission circular. Every figure on this page, on every scale, is worked out from the converted letter, and each subject card shows you which letter it landed on.',
   },
   {
-    q: 'Why do different universities give me a different GPA?',
-    a: 'Because they use different rules on the same grades. Most award an E one point; BRAC removes E subjects before averaging instead. Engineering universities such as AUST add your O and A Level GPAs into a single figure. All of the numbers shown are correct, just for different places.',
+    q: 'Why does each university give me a different GPA?',
+    a: 'Because the same letters are worth different amounts depending on who is reading them. Most private universities use A*/A = 5, B = 4, C = 3, D = 2, E = 1. BRAC removes E grade subjects before it averages, rather than scoring them a point. IBA at Dhaka University pays more for a C, at 3.5, but scores a D or below as nothing at all. BUP does not calculate an average in the first place, it totals points and asks for 26.5. None of these is the real one, which is why they are all shown side by side.',
   },
   {
-    q: 'Do I need an admission test even if I qualify?',
-    a: 'Usually yes. The GPA is a threshold to be allowed to sit the test, not an offer. Nearly every university in Bangladesh runs its own admission test or interview afterwards.',
+    q: 'Do I still have to sit an admission test?',
+    a: 'Almost always. Meeting the requirement gets you into the exam hall, nothing more. At BUET and IUT the test result alone builds the merit list, and your grades only decide whether you may sit it. There are exceptions worth knowing: UIU will interview instead of testing you if you hold four A grades at O Level or an SAT-I of 1000 or more, NSU accepts an SAT score in place of its test for everything except B.Pharm and LL.B, and IUB considers exemptions case by case for a CGPA of 3.00 or above.',
   },
   {
-    q: 'Why might a university still reject me when this says I qualify?',
-    a: 'Meeting the published minimum only makes your application valid. Places are limited and competitive, departments can ask for specific subjects, and requirements change from year to year. Treat this as a check that you are not below the bar, not a prediction.',
+    q: 'Can I apply before my results come out?',
+    a: 'Yes, and most people do. You apply and sit the test as an appeared student, then produce the result before you enrol. NSU says exactly that in its own rules. It matters because Fall deadlines at the big private universities usually land before results are published in August. What you will not find here is a UK-style conditional offer on predicted grades: Bangladeshi universities want the actual result before enrolment.',
+  },
+  {
+    q: 'When do the results come out?',
+    a: 'For the May and June 2026 series: Edexcel International A Level on 13 August 2026, Cambridge International AS and A Level on 11 August 2026, and Cambridge IGCSE and O Level on 18 August 2026. January series IAL results land in early March. Since most Fall deadlines fall before those August dates, applying with results still pending is normal.',
+  },
+  {
+    q: 'Why might I still be rejected when this says eligible?',
+    a: 'Eligible means you clear the published minimum. It does not mean a seat. For nearly every department listed, the requirement is a gate and the admission test decides who actually gets through it, with far more applicants than places. BUET takes roughly 1,300 students from around 10,000 who sit its test. Requirements also shift each cycle. Use this to decide where applying is worth the fee, then read the current circular before you pay it.',
+  },
+  {
+    q: 'Do the years I sat my exams matter?',
+    a: 'More often than students expect, and this is the rule most people miss. Several universities only accept recent results. BRAC takes A Levels from the current year or the two before it. MIST wants O Levels from 2022 or 2023 and A Levels from 2024 or 2025, and IUT is close to that. Jahangirnagar, including IBA-JU, accepts O Levels from 2020 onwards with A Levels from 2024 or 2025. The government medical colleges want A Levels from 2024 or 2025. These windows move every cycle, so check the current circular rather than trusting any calculator on the point.',
   },
   {
     q: 'What if I did not take Mathematics at A Level?',
-    a: 'It rules out most engineering and computer science departments, which ask for it by name, but not business, law, social science or many science programmes. The requirement is set per department, so check the one you want.',
+    a: 'It closes fewer doors than you would think outside engineering. NSU and BRAC will both admit you without it on the condition that you clear an extra three credit maths course during your degree, and IUB and UIU apply the same arrangement to Pharmacy. Engineering is where it is genuinely non-negotiable, and at BUET, IUT and MIST it has to be a strong grade rather than a pass. Dhaka University\'s Science Unit is more flexible than its reputation suggests: it asks for Physics and Chemistry plus either Biology or Mathematics.',
   },
 ]
 

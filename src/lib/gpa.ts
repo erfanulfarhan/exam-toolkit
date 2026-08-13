@@ -44,20 +44,27 @@ export function gradesFor(level: Level, scale: Scale): string[] {
  * the higher of the two.
  */
 const NUMERIC_AS_LETTER: Record<string, string> = {
-  '9': 'A*', '8': 'A', '7': 'A', '6': 'B', '5': 'B', '4': 'C', '3': 'D', '2': 'E', '1': 'G', U: 'U',
+  '9': 'A*', '8': 'A*', '7': 'A', '6': 'B', '5': 'B', '4': 'C', '3': 'D', '2': 'E', '1': 'F', U: 'U',
 }
 
-/** The points nearly every private university applies to a letter grade. */
-const STANDARD: Record<string, number> = {
-  'A*': 5, A: 5, B: 4, C: 3, D: 2, E: 1, F: 0, G: 0, U: 0,
-}
+/**
+ * Point sets. `standard` is what nearly every private university applies. IBA
+ * at Dhaka University scores a C higher but throws away anything below it, so
+ * the same grades land differently.
+ */
+export const POINT_SETS = {
+  standard: { 'A*': 5, A: 5, B: 4, C: 3, D: 2, E: 1, F: 0, G: 0, U: 0 },
+  iba: { 'A*': 5, A: 5, B: 4, C: 3.5, D: 0, E: 0, F: 0, G: 0, U: 0 },
+} as const satisfies Record<string, Record<string, number>>
+
+export type PointSet = keyof typeof POINT_SETS
 
 export function asLetter(entry: Entry): string {
   return entry.scale === 'numeric' ? (NUMERIC_AS_LETTER[entry.grade] ?? 'U') : entry.grade
 }
 
-export function pointsOf(entry: Entry): number {
-  return STANDARD[asLetter(entry)] ?? 0
+export function pointsOf(entry: Entry, set: PointSet = 'standard'): number {
+  return (POINT_SETS[set] as Record<string, number>)[asLetter(entry)] ?? 0
 }
 
 /** How many subjects count towards each level's GPA. */
@@ -77,10 +84,12 @@ export type Counted = {
  * count against you. `dropE` is BRAC's rule, where an E is removed from the
  * pool entirely instead of scoring a point.
  */
-export function best(entries: Entry[], level: Level, dropE = false): Counted {
+export function best(
+  entries: Entry[], level: Level, dropE = false, set: PointSet = 'standard',
+): Counted {
   const pool = entries
     .filter((e) => e.grade && (!dropE || asLetter(e) !== 'E'))
-    .map((e) => ({ e, p: pointsOf(e) }))
+    .map((e) => ({ e, p: pointsOf(e, set) }))
     .sort((a, b) => b.p - a.p)
   const take = COUNTS[level]
   const counting = pool.slice(0, take).map((x) => x.e)
@@ -106,6 +115,8 @@ export function allScales(oLevels: Entry[], aLevels: Entry[]): ScaleResult[] {
   const standardA = best(aLevels, 'a').gpa
   const bracO = best(oLevels, 'o', true).gpa
   const bracA = best(aLevels, 'a', true).gpa
+  const ibaO = best(oLevels, 'o', false, 'iba').gpa
+  const ibaA = best(aLevels, 'a', false, 'iba').gpa
   return [
     {
       key: 'standard',
@@ -129,6 +140,22 @@ export function allScales(oLevels: Entry[], aLevels: Entry[]): ScaleResult[] {
       a: standardA,
       combined: standardO + standardA,
       threshold: 7,
+    },
+    {
+      key: 'bup',
+      name: 'BUP points total',
+      note: 'BUP does not average at all. It totals points across your subjects and asks for 26.5 or above.',
+      o: standardO,
+      a: standardA,
+      combined: (standardO + standardA) * 5,
+      threshold: 26.5,
+    },
+    {
+      key: 'iba',
+      name: 'IBA, Dhaka University',
+      note: 'A is 5, B is 4, C is 3.5, and anything at D or below scores nothing at all.',
+      o: ibaO,
+      a: ibaA,
     },
   ]
 }
