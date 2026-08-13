@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { motion } from 'motion/react'
-import { ChevronDown, Plus, Trash2 } from 'lucide-react'
+import { Check, ChevronDown, Plus, Search, Trash2 } from 'lucide-react'
 import { Card, Select, TONES } from '@/components/ui'
 import {
   Board, COUNTS, Entry, Level, Scale, allScales, asLetter, best, gradesFor, pointsOf,
@@ -8,6 +8,7 @@ import {
 import {
   AWARDS, CATEGORIES, Category, Department, UNIVERSITIES, Verdict, countAtLeast, departmentVerdict,
 } from '@/lib/universities'
+import { suggest } from '@/lib/subjects'
 
 const STORE = 'gpa.entries'
 let nextId = 1
@@ -39,8 +40,8 @@ export function GpaPage() {
     setRows((r) => ({ ...r, [level]: r[level].map((e) => (e.id === id ? { ...e, ...patch } : e)) }))
   const remove = (level: Level, id: number) =>
     setRows((r) => ({ ...r, [level]: r[level].filter((e) => e.id !== id) }))
-  const add = (level: Level) =>
-    setRows((r) => ({ ...r, [level]: [...r[level], make(level, r[level].at(-1)?.board ?? 'edexcel')] }))
+  const add = (level: Level, subject = '', board: Board = 'edexcel') =>
+    setRows((r) => ({ ...r, [level]: [...r[level], { ...make(level, board), subject }] }))
 
   const scales = useMemo(() => allScales(rows.o, rows.a), [rows])
   const oBest = useMemo(() => best(rows.o, 'o'), [rows.o])
@@ -69,11 +70,11 @@ export function GpaPage() {
       <div className="grid lg:grid-cols-2 gap-4 items-start">
         <Panel
           level="o" title="O Level / IGCSE" entries={rows.o} counted={oBest}
-          onAdd={() => add('o')} onUpdate={update} onRemove={remove}
+          onAdd={(subject, board) => add('o', subject, board)} onUpdate={update} onRemove={remove}
         />
         <Panel
           level="a" title="A Level / IAL" entries={rows.a} counted={aBest}
-          onAdd={() => add('a')} onUpdate={update} onRemove={remove}
+          onAdd={(subject, board) => add('a', subject, board)} onUpdate={update} onRemove={remove}
         />
       </div>
 
@@ -137,7 +138,7 @@ function Panel({
   title: string
   entries: Entry[]
   counted: ReturnType<typeof best>
-  onAdd: () => void
+  onAdd: (subject?: string, board?: Board) => void
   onUpdate: (level: Level, id: number, patch: Partial<Entry>) => void
   onRemove: (level: Level, id: number) => void
 }) {
@@ -241,12 +242,7 @@ function Panel({
         ))}
       </div>
 
-      <button
-        onClick={onAdd}
-        className="mt-3 w-full h-10 rounded-xl border border-dashed border-line text-sm font-semibold text-muted hover:text-ink hover:border-muted transition-colors inline-flex items-center justify-center gap-1.5"
-      >
-        <Plus size={15} /> Add a subject
-      </button>
+      <SubjectSearch level={level} taken={entries.map((e) => e.subject)} onAdd={onAdd} />
 
       {counted.counting.length > 0 && (
         <div className="mt-4 pt-3 border-t border-line/60">
@@ -462,6 +458,97 @@ function Awards({ o, a }: { o: Entry[]; a: Entry[] }) {
         })}
       </div>
     </>
+  )
+}
+
+/**
+ * Pick a subject by name. Typing narrows the board's own list, and anything not
+ * on it can still be added exactly as written, because a retired subject or an
+ * unusual one is not a reason to be turned away.
+ */
+function SubjectSearch({
+  level, taken, onAdd,
+}: {
+  level: Level
+  taken: string[]
+  onAdd: (subject?: string, board?: Board) => void
+}) {
+  const [board, setBoard] = useState<Board>('edexcel')
+  const [query, setQuery] = useState('')
+  const [open, setOpen] = useState(false)
+  const matches = useMemo(() => suggest(board, level, query).slice(0, 8), [board, level, query])
+  const has = (name: string) => taken.some((t) => t.toLowerCase() === name.toLowerCase())
+
+  const choose = (name: string) => {
+    onAdd(name, board)
+    setQuery('')
+    setOpen(false)
+  }
+
+  return (
+    <div className="mt-3">
+      <div className="flex items-center gap-2 mb-2">
+        <span className="text-[10px] font-semibold uppercase tracking-[.12em] text-muted">Exam board</span>
+        {(['edexcel', 'cambridge'] as const).map((b) => (
+          <button
+            key={b}
+            onClick={() => setBoard(b)}
+            className={
+              'h-7 px-2.5 rounded-lg text-[11px] font-semibold border transition-colors ' +
+              (board === b ? 'border-amber-400/60 bg-amber-400/15 text-ink' : 'border-line text-muted hover:text-ink')
+            }
+          >
+            {b === 'edexcel' ? 'Edexcel' : 'Cambridge'}
+          </button>
+        ))}
+        <span className="text-[10px] text-muted/70 hidden sm:inline">applies to what you add next</span>
+      </div>
+
+      <div className="relative">
+        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
+        <input
+          value={query}
+          onChange={(e) => { setQuery(e.target.value); setOpen(true) }}
+          onFocus={() => setOpen(true)}
+          onBlur={() => window.setTimeout(() => setOpen(false), 150)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && (matches[0] || query.trim())) choose(matches[0] ?? query.trim())
+            if (e.key === 'Escape') setOpen(false)
+          }}
+          placeholder={level === 'o' ? 'Type a subject, e.g. Physics' : 'Type a subject, e.g. Chemistry'}
+          className="w-full h-10 pl-9 pr-3 rounded-xl border border-line bg-black/25 text-sm outline-none focus:border-amber-400/60 transition-colors"
+        />
+
+        {open && (matches.length > 0 || query.trim()) && (
+          <div className="absolute z-20 left-0 right-0 top-12 rounded-xl border border-line bg-bg shadow-2xl overflow-hidden">
+            {matches.map((name) => (
+              <button
+                key={name}
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => choose(name)}
+                className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm hover:bg-white/[0.05] transition-colors"
+              >
+                {has(name)
+                  ? <Check size={14} className="text-emerald-400 shrink-0" />
+                  : <Plus size={14} className="text-amber-300 shrink-0" />}
+                <span className="flex-1 truncate">{name}</span>
+                {has(name) && <span className="text-[10px] text-muted">added</span>}
+              </button>
+            ))}
+            {query.trim() && !matches.some((m) => m.toLowerCase() === query.trim().toLowerCase()) && (
+              <button
+                onMouseDown={(e) => e.preventDefault()}
+                onClick={() => choose(query.trim())}
+                className="w-full flex items-center gap-2 px-3 py-2 text-left text-sm border-t border-line/60 hover:bg-white/[0.05] transition-colors"
+              >
+                <Plus size={14} className="text-muted shrink-0" />
+                <span className="truncate">Add &ldquo;{query.trim()}&rdquo; as a custom subject</span>
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
   )
 }
 
