@@ -12,9 +12,6 @@ import {
 import { suggest } from '@/lib/subjects'
 import { Link } from '@/lib/router'
 
-/** Subjects the archive holds papers for, so a shortfall can link to practice. */
-const SUBJECT_HINTS = ['Mathematics', 'Physics', 'Chemistry', 'Biology', 'Economics', 'Accounting', 'Business', 'English']
-
 const STORE = 'gpa.entries'
 const SITTINGS = ['Jan', 'May/June', 'Oct/Nov']
 const THIS_YEAR = new Date().getFullYear()
@@ -361,21 +358,13 @@ function Eligibility({ o, a }: { o: Entry[]; a: Entry[] }) {
                 Within reach
               </div>
               <div className="space-y-1.5">
-                {withinReach.map(({ uni, dept: d, reason }) => {
-                  const subject = SUBJECT_HINTS.find((n) => reason.includes(n))
-                  return (
-                    <div key={uni.id + d.name} className="flex flex-wrap items-baseline gap-x-2 text-[13px]">
-                      <span className="font-semibold">{uni.short}</span>
-                      <span className="text-muted truncate">{d.name}</span>
-                      <span className="text-amber-300/90 text-[11px]">{reason}</span>
-                      {subject && (
-                        <Link to="/practice" className="text-teal-300 hover:text-teal-200 text-[11px] font-semibold">
-                          practise {subject} &rarr;
-                        </Link>
-                      )}
-                    </div>
-                  )
-                })}
+                {withinReach.map(({ uni, dept: d, reason }) => (
+                  <div key={uni.id + d.name} className="flex flex-wrap items-baseline gap-x-2 text-[13px]">
+                    <span className="font-semibold">{uni.short}</span>
+                    <span className="text-muted truncate">{d.name}</span>
+                    <span className="text-amber-300/90 text-[11px]">{reason}</span>
+                  </div>
+                ))}
               </div>
             </div>
           )}
