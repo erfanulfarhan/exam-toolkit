@@ -1,0 +1,43 @@
+name: Refresh grade boundaries
+
+# Results are published in the morning UK time, so this looks a few times a day
+# rather than once: a session that lands at 08:00 should be on the site within
+# the hour, not the next morning.
+on:
+  schedule:
+    - cron: '0 6,9,12,15 * * *'
+  workflow_dispatch:        # run it by hand from the Actions tab
+
+# Pushing back to the repository is what deploys the site, via Vercel's Git
+# integration, so the job needs write access to contents.
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install the PDF parser
+        run: pip install pdfplumber requests
+
+      - name: Pull in anything Pearson has published
+        run: python3 tools/refresh.py
+
+      - name: Commit and push if the boundaries changed
+        run: |
+          if [ -z "$(git status --porcelain data/)" ]; then
+            echo "No new session. Nothing to do."
+            exit 0
+          fi
+          git config user.name  "boundaries-bot"
+          git config user.email "boundaries-bot@users.noreply.github.com"
+          git add data/
+          git commit -m "Add newly published grade boundaries"
+          git push
+          echo "Pushed new boundaries. Vercel will redeploy."
