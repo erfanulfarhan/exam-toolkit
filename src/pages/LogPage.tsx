@@ -47,11 +47,11 @@ export function LogPage() {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="mb-8"
+        className="mb-10"
       >
         <h1 className="font-display text-3xl sm:text-[2.5rem] font-bold tracking-tight leading-[1.1]">
           Your practice{' '}
-          <span className="bg-gradient-to-r from-teal-300 via-sky-400 to-fuchsia-500 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-[#82C8E5] via-[#0047AB] to-[#000080] bg-clip-text text-transparent">
             log
           </span>
         </h1>
@@ -62,7 +62,7 @@ export function LogPage() {
       </motion.section>
 
       {entries.length === 0 ? (
-        <Card className="p-8 text-center">
+        <Card className="p-5 sm:p-8 text-center">
           <span className={'grid place-items-center h-12 w-12 rounded-2xl bg-gradient-to-br text-white mx-auto mb-4 ' + TONES.teal.grad}>
             <LineChart size={20} />
           </span>
@@ -72,7 +72,7 @@ export function LogPage() {
           </p>
           <Link
             to="/practice"
-            className="inline-block mt-5 h-10 px-4 leading-10 rounded-xl bg-gradient-to-br from-violet-400 to-fuchsia-500 text-white text-sm font-bold hover:brightness-110 transition-all"
+            className="inline-block mt-5 h-10 px-4 leading-10 rounded-xl bg-gradient-to-br from-[#0047AB] to-[#000080] text-white text-sm font-bold hover:brightness-110 transition-all"
           >
             Start practising
           </Link>
@@ -88,7 +88,7 @@ export function LogPage() {
           {scored.length >= 2 && (
             <Card className="p-5">
               <h2 className="font-display text-lg font-semibold tracking-tight flex items-center gap-2">
-                <TrendingUp size={17} className="text-teal-300" /> How you are moving
+                <TrendingUp size={17} className="text-[#82C8E5]" /> How you are moving
               </h2>
               <p className="text-sm text-muted mt-1">
                 Oldest to newest, for papers whose total is known.
@@ -100,7 +100,7 @@ export function LogPage() {
                       {percent}
                     </span>
                     <div
-                      className="w-full rounded-t-md bg-gradient-to-t from-teal-500/60 to-teal-300 min-h-[3px]"
+                      className="w-full rounded-t-md bg-gradient-to-t from-[#0047AB]/70 to-[#82C8E5] min-h-[3px]"
                       style={{ height: `${Math.max(3, percent)}%` }}
                       title={`${entry.subject} ${entry.unit} · ${sitting(entry)} · ${percent}%`}
                     />
@@ -190,7 +190,7 @@ export function LogPage() {
 
 function Stat({ label, value, tone }: { label: string; value: string; tone: 'teal' | 'violet' | 'amber' }) {
   return (
-    <Card className="p-4">
+    <Card className="p-5">
       <div className="text-[11px] font-semibold uppercase tracking-[.09em] text-muted">{label}</div>
       <div className={'font-display font-bold text-3xl leading-none mt-2 ' + TONES[tone].text}>{value}</div>
     </Card>

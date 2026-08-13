@@ -58,11 +58,11 @@ export function GpaPage() {
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="mb-8"
+        className="mb-10"
       >
         <h1 className="font-display text-3xl sm:text-[2.5rem] font-bold tracking-tight leading-[1.1]">
           Your grades as a{' '}
-          <span className="bg-gradient-to-r from-teal-300 via-sky-400 to-fuchsia-500 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-[#82C8E5] via-[#0047AB] to-[#000080] bg-clip-text text-transparent">
             GPA
           </span>
         </h1>
@@ -187,7 +187,7 @@ function Panel({
                 <span className={
                   'shrink-0 text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-md border ' +
                   (isCounting(entry)
-                    ? 'bg-amber-400/15 text-amber-300 border-amber-400/40'
+                    ? 'bg-amber-400/15 text-[#82C8E5] border-amber-400/40'
                     : 'text-muted border-line')
                 }>
                   {isCounting(entry) ? 'counted' : 'extra'}
@@ -259,7 +259,7 @@ function Panel({
                   className={
                     'h-8 min-w-8 px-2 rounded-lg text-xs font-bold transition-colors border ' +
                     (entry.grade === g
-                      ? 'bg-amber-400 text-black border-amber-400'
+                      ? 'bg-[#82C8E5] text-[#08172a] border-[#82C8E5]'
                       : 'border-line bg-black/25 text-muted hover:text-ink')
                   }
                 >
@@ -277,7 +277,7 @@ function Panel({
           <div className="flex flex-wrap gap-1.5">
             {counted.counting.map((c, i) => (
               <span key={c.id} className="text-[11px] px-2 py-1 rounded-md bg-white/[0.05] border border-line">
-                {c.subject || `Subject ${i + 1}`} <b className="text-amber-300">{c.grade}</b>
+                {c.subject || `Subject ${i + 1}`} <b className="text-[#82C8E5]">{c.grade}</b>
               </span>
             ))}
           </div>
@@ -325,7 +325,7 @@ function Eligibility({ o, a }: { o: Entry[]; a: Entry[] }) {
   return (
     <>
       {entered === 0 && (
-        <Card className="p-6 mt-8 text-center">
+        <Card className="p-5 mt-10 text-center">
           <p className="text-sm text-muted max-w-md mx-auto leading-relaxed">
             Add your grades above and every department here is checked against them, with the
             reason spelled out wherever you fall short.
@@ -362,7 +362,7 @@ function Eligibility({ o, a }: { o: Entry[]; a: Entry[] }) {
                   <div key={uni.id + d.name} className="flex flex-wrap items-baseline gap-x-2 text-[13px]">
                     <span className="font-semibold">{uni.short}</span>
                     <span className="text-muted truncate">{d.name}</span>
-                    <span className="text-amber-300/90 text-[11px]">{reason}</span>
+                    <span className="text-[#82C8E5]/90 text-[11px]">{reason}</span>
                   </div>
                 ))}
               </div>
@@ -373,7 +373,7 @@ function Eligibility({ o, a }: { o: Entry[]; a: Entry[] }) {
 
       {entered > 0 && (
       <>
-      <h2 className="font-display text-xl font-semibold tracking-tight mt-8 mb-1">
+      <h2 className="font-display text-lg font-semibold tracking-tight mt-10 mb-1">
         Every department
       </h2>
       <p className="text-sm text-muted mb-3">
@@ -388,7 +388,7 @@ function Eligibility({ o, a }: { o: Entry[]; a: Entry[] }) {
             onClick={() => setFilter(k)}
             className={
               'h-8 px-3 rounded-lg text-xs font-semibold border transition-colors ' +
-              (filter === k ? 'border-amber-400/60 bg-amber-400/15 text-ink' : 'border-line text-muted hover:text-ink')
+              (filter === k ? 'border-[#82C8E5]/60 bg-[#82C8E5]/15 text-ink' : 'border-line text-muted hover:text-ink')
             }
           >
             {label}
@@ -435,7 +435,7 @@ function Eligibility({ o, a }: { o: Entry[]; a: Entry[] }) {
                 </span>
                 <span className="hidden sm:block w-24 h-1.5 rounded-full bg-black/40 overflow-hidden shrink-0">
                   <span
-                    className="block h-full rounded-full bg-gradient-to-r from-amber-300 to-orange-500"
+                    className="block h-full rounded-full bg-gradient-to-r from-[#82C8E5] to-[#0047AB]"
                     style={{ width: `${(passing / Math.max(1, uni.departments.length)) * 100}%` }}
                   />
                 </span>
@@ -483,7 +483,7 @@ function Eligibility({ o, a }: { o: Entry[]; a: Entry[] }) {
                     {uni.admissionTest && <span>Admission test required</span>}
                     {uni.equivalenceRequired && <span>UGC equivalence certificate needed</span>}
                     {uni.source && (
-                      <a href={uni.source} target="_blank" rel="noopener noreferrer" className="text-teal-300 hover:text-teal-200 font-semibold">
+                      <a href={uni.source} target="_blank" rel="noopener noreferrer" className="text-[#82C8E5] hover:text-teal-200 font-semibold">
                         Official admissions page
                       </a>
                     )}
@@ -607,7 +607,7 @@ function SubjectSearch({
             onClick={() => setBoard(b)}
             className={
               'h-7 px-2.5 rounded-lg text-[11px] font-semibold border transition-colors ' +
-              (board === b ? 'border-amber-400/60 bg-amber-400/15 text-ink' : 'border-line text-muted hover:text-ink')
+              (board === b ? 'border-[#82C8E5]/60 bg-[#82C8E5]/15 text-ink' : 'border-line text-muted hover:text-ink')
             }
           >
             {b === 'edexcel' ? 'Edexcel' : 'Cambridge'}
@@ -652,7 +652,7 @@ function SubjectSearch({
               >
                 {has(name)
                   ? <Check size={14} className="text-emerald-400 shrink-0" />
-                  : <Plus size={14} className="text-amber-300 shrink-0" />}
+                  : <Plus size={14} className="text-[#82C8E5] shrink-0" />}
                 <span className="flex-1 truncate">{name}</span>
                 {has(name) && <span className="text-[10px] text-muted">added</span>}
               </button>

@@ -177,7 +177,7 @@ export function PracticePage() {
           {paperMeta ? (
             <>
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] font-semibold uppercase tracking-[.09em] text-muted mb-1">
-                <span className="text-teal-300">{paperMeta.level}</span>
+                <span className="text-[#82C8E5]">{paperMeta.level}</span>
                 <span>·</span><span>{paperMeta.subject}</span>
                 {sessionLabel(paperMeta) && (<><span>·</span><span className="text-violet-300">{sessionLabel(paperMeta)}</span></>)}
               </div>
@@ -195,7 +195,7 @@ export function PracticePage() {
             {total > 0 && <> · {total} marks self-scored</>}
           </p>
           {questions.length === 0 && (
-            <p className="text-xs text-amber-300/90 mt-1 max-w-xl">
+            <p className="text-xs text-[#82C8E5]/90 mt-1 max-w-xl">
               Question numbers could not be read from this paper, so jumping between
               questions is off. Both documents still open in full.
             </p>
@@ -208,7 +208,7 @@ export function PracticePage() {
               className={
                 'h-10 px-3 rounded-xl border text-sm font-semibold transition-colors inline-flex items-center gap-1.5 ' +
                 (sidebarOpen
-                  ? 'border-teal-400/50 bg-teal-400/15 text-ink'
+                  ? 'border-[#82C8E5]/50 bg-[#82C8E5]/15 text-ink'
                   : 'border-line text-muted hover:text-ink')
               }
               title="Browse this subject's papers"
@@ -233,7 +233,7 @@ export function PracticePage() {
             className={
               'h-10 px-3 rounded-xl border text-sm font-semibold transition-colors inline-flex items-center gap-1.5 ' +
               (gated
-                ? 'border-violet-400/50 bg-violet-400/15 text-ink'
+                ? 'border-[#0047AB]/60 bg-[#0047AB]/25 text-ink'
                 : 'border-line text-muted hover:text-ink')
             }
             title={gated ? 'Mark scheme is revealed one question at a time' : 'Mark scheme is fully open'}
@@ -284,7 +284,7 @@ export function PracticePage() {
               className={
                 'h-9 min-w-9 px-2 rounded-xl text-sm font-semibold transition-colors border ' +
                 (n === current
-                  ? 'border-violet-400/60 bg-violet-400/20 text-ink'
+                  ? 'border-violet-400/60 bg-[#0047AB]/30 text-ink'
                   : attempted(n)
                     ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300'
                     : 'border-line bg-black/25 text-muted hover:text-ink')
@@ -664,7 +664,7 @@ function PaperSidebar({
                       className={
                         'w-full flex items-center gap-2 text-left text-[13px] rounded-lg py-1.5 pl-7 pr-2 transition-colors ' +
                         (active
-                          ? 'bg-violet-400/20 text-ink font-semibold'
+                          ? 'bg-[#0047AB]/30 text-ink font-semibold'
                           : 'text-muted hover:text-ink hover:bg-white/[0.04]')
                       }
                     >
@@ -701,7 +701,7 @@ function Setup({
       >
         <h1 className="font-display text-3xl sm:text-[2.75rem] font-bold tracking-tight leading-[1.1]">
           Every past paper,{' '}
-          <span className="bg-gradient-to-r from-teal-300 via-sky-400 to-fuchsia-500 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-[#82C8E5] via-[#0047AB] to-[#000080] bg-clip-text text-transparent">
             marked honestly
           </span>
         </h1>
@@ -1009,7 +1009,7 @@ function Pane({
               {onUnlock && (
                 <button
                   onClick={onUnlock}
-                  className="mt-4 h-10 px-4 rounded-xl bg-gradient-to-br from-violet-400 to-fuchsia-500 text-white text-sm font-bold inline-flex items-center gap-2 hover:brightness-110 transition-all"
+                  className="mt-4 h-10 px-4 rounded-xl bg-gradient-to-br from-[#0047AB] to-[#000080] text-white text-sm font-bold inline-flex items-center gap-2 hover:brightness-110 transition-all"
                 >
                   <Eye size={15} /> I have attempted it
                 </button>
