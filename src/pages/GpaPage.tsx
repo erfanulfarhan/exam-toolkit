@@ -9,6 +9,10 @@ import {
   AWARDS, CATEGORIES, Category, Department, UNIVERSITIES, Verdict, countAtLeast, departmentVerdict,
 } from '@/lib/universities'
 import { suggest } from '@/lib/subjects'
+import { Link } from '@/lib/router'
+
+/** Subjects the archive holds papers for, so a shortfall can link to practice. */
+const SUBJECT_HINTS = ['Mathematics', 'Physics', 'Chemistry', 'Biology', 'Economics', 'Accounting', 'Business', 'English']
 
 const STORE = 'gpa.entries'
 let nextId = 1
@@ -286,9 +290,12 @@ function Eligibility({ o, a }: { o: Entry[]; a: Entry[] }) {
 
   return (
     <>
-      <h2 className="font-display text-xl font-semibold tracking-tight mt-8 mb-1">University eligibility</h2>
+      <h2 className="font-display text-xl font-semibold tracking-tight mt-8 mb-1">
+        What your grades open
+      </h2>
       <p className="text-sm text-muted mb-3">
-        {totals.yes} of {totals.all} departments across {UNIVERSITIES.length} universities, on the grades above.
+        {totals.yes} of {totals.all} departments across {UNIVERSITIES.length} universities. Where a
+        subject grade is what stands in the way, the reason links to that subject's past papers.
       </p>
 
       <div className="flex flex-wrap gap-1.5 mb-2">
@@ -369,10 +376,26 @@ function Eligibility({ o, a }: { o: Entry[]; a: Entry[] }) {
                         </span>
                       </div>
                       {!verdict.eligible && (
-                        <ul className="mt-1.5 space-y-0.5">
-                          {verdict.reasons.map((r) => (
-                            <li key={r} className="text-[11px] text-rose-300/90 leading-relaxed">{r}</li>
-                          ))}
+                        <ul className="mt-1.5 space-y-1">
+                          {verdict.reasons.map((r) => {
+                            // A shortfall in a named subject is something you can
+                            // still act on, so it links straight to that subject's
+                            // papers rather than leaving you at a dead end.
+                            const subject = SUBJECT_HINTS.find((n) => r.includes(n))
+                            return (
+                              <li key={r} className="text-[11px] text-rose-300/90 leading-relaxed">
+                                {r}
+                                {subject && (
+                                  <Link
+                                    to="/practice"
+                                    className="ml-1.5 text-teal-300 hover:text-teal-200 font-semibold whitespace-nowrap"
+                                  >
+                                    practise {subject} &rarr;
+                                  </Link>
+                                )}
+                              </li>
+                            )
+                          })}
                         </ul>
                       )}
                       {d.notes && <p className="text-[11px] text-muted mt-1.5 leading-relaxed">{d.notes}</p>}
