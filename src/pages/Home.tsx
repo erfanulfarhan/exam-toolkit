@@ -74,6 +74,21 @@ const TOOLS: {
   },
 ]
 
+const STEPS = [
+  {
+    title: 'Sit a paper properly',
+    body: 'Open any past paper beside its mark scheme. The scheme stays locked question by question until you have attempted it, and there is a timer if you want it under exam conditions.',
+  },
+  {
+    title: 'Mark it and watch the trend',
+    body: 'Score yourself question by question and the raw total becomes a real grade off the published boundaries. Every paper you mark is logged, so your weakest units surface on their own.',
+  },
+  {
+    title: 'See where it gets you',
+    body: 'Turn those grades into the GPA each university actually uses, and check which departments they open. Then plan the run-up with the timetable and routine builder.',
+  },
+]
+
 export function Home() {
   return (
     <>
@@ -117,6 +132,30 @@ export function Home() {
           Built for students sitting Edexcel and Cambridge exams. Everything you enter stays in
           your own browser.
         </p>
+      </motion.section>
+
+      <motion.section
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.12, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        className="mb-12 rounded-3xl border border-line/80 bg-card/40 backdrop-blur-xl p-6 sm:p-8"
+      >
+        <h2 className="font-display text-lg font-semibold tracking-tight">How it fits together</h2>
+        <p className="text-sm text-muted mt-1.5 max-w-2xl leading-relaxed">
+          The tools feed each other. You do not have to use all of them, but they are built to be
+          used in this order.
+        </p>
+        <ol className="grid sm:grid-cols-3 gap-5 sm:gap-6 mt-6">
+          {STEPS.map((step, i) => (
+            <li key={step.title} className="relative">
+              <span className="inline-grid place-items-center h-8 w-8 rounded-xl bg-[#68BA7F]/15 border border-[#68BA7F]/30 text-[#CFFFDC] font-display font-bold text-sm mb-3">
+                {i + 1}
+              </span>
+              <h3 className="font-semibold text-sm">{step.title}</h3>
+              <p className="text-[13px] text-muted mt-1.5 leading-relaxed">{step.body}</p>
+            </li>
+          ))}
+        </ol>
       </motion.section>
 
       <h2 className="font-display text-lg font-semibold tracking-tight mb-4">
