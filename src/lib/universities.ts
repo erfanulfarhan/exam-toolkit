@@ -200,16 +200,24 @@ export const UNIVERSITIES: University[] = [
     name: 'Independent University, Bangladesh',
     short: 'IUB',
     type: 'private',
-    source: 'https://www.iub.edu.bd/admissions',
+    source: 'https://iub.ac.bd/admissions/undergraduate-admissions',
     admissionTest: true,
     equivalenceRequired: false,
-    general: [],
+    general: [{ kind: 'average', level: 'o', min: 2.5 }, { kind: 'average', level: 'a', min: 2.0 }],
+    note: 'Five O Levels at 2.50 and two A Levels at 2.00. The test is set per programme and can be waived on an SAT of 1000 with IELTS 5.5 or TOEFL 80. O and A Level certificates carry a 3,000 taka verification fee.',
     departments: [
-      ...engineering(['Computer Science & Engineering (CSE)', 'Electrical & Electronic Engineering (EEE)', 'Electronics & Telecommunication Engineering (ETE)'],
-        [subj('Mathematics', 'a', 'C'), subj('Physics', 'a', 'C')]),
-      dept('Pharmacy (B.Pharm)', 'Pharmacy', [subj('Biology', 'o', 'C'), subj('Chemistry', 'a', 'C')]),
-      dept('Environmental Science (ES)', 'Science'),
+      ...engineering(['Computer Science & Engineering (CSE)', 'Electrical & Electronic Engineering (EEE)', 'Electronics & Telecommunication Engineering (ETE)', 'Computer Engineering'],
+        [subj('Mathematics', 'o', 'U'), subj('Physics', 'o', 'U')]),
+      dept('Microbiology', 'Science', [subj('Biology', 'o', 'B')]),
+      dept('Biochemistry & Biotechnology', 'Science', [subj('Biology', 'o', 'B')],
+        'An extra 30 minute biology paper is added to the test.'),
+      dept('Environmental Science & Management', 'Science', [],
+        'Chemistry or Physics is preferred rather than required.'),
+      dept('Pharmacy (B.Pharm)', 'Pharmacy',
+        [subj('Chemistry', 'a', 'B'), subj('Biology', 'a', 'B'), subj('Mathematics', 'a', 'C'), subj('Physics', 'a', 'C')],
+        'Without Mathematics you can still be admitted, but must clear an extra maths course.'),
       dept('Business Administration (BBA)', 'Business'),
+      dept('Law (LL.B Hons)', 'Law'),
     ],
   },
   {
@@ -452,12 +460,17 @@ export const UNIVERSITIES: University[] = [
     name: 'Institute of Business Administration, Jahangirnagar University',
     short: 'IBA-JU',
     type: 'public',
-    source: 'https://juniv.edu',
+    source: 'https://bachelor.ju-admission.com',
     admissionTest: true,
-    equivalenceRequired: true,
-    general: [],
+    equivalenceRequired: false,
+    general: [
+      { kind: 'countAtGrade', count: 4, minGrade: 'B' },
+      { kind: 'countAtGrade', count: 3, minGrade: 'C' },
+    ],
+    note: 'Admitted through Jahangirnagar\'s central circular rather than its own. Five O Levels from 2020 onwards and two A Levels from 2024 or 2025, and across those seven, four at B and three at C. Merit scores A at 5, B at 4, C at 3.5 and D at 3. Fifty seats.',
     departments: [
-      dept('Business Administration (BBA)', 'Business', [{ kind: 'countAtGrade', count: 7, minGrade: 'C' }]),
+      dept('Business Administration (BBA)', 'Business', [],
+        'No subject requirement is published for O and A Level applicants. The test is 80 MCQ marks, mostly English and mathematical aptitude, needing 45 per cent to pass.'),
     ],
   },
   {
@@ -469,63 +482,14 @@ export const UNIVERSITIES: University[] = [
     admissionTest: true,
     equivalenceRequired: true,
     general: [],
-    note: 'Entry is by the national MBBS/BDS admission test, and only Physics, Chemistry and Biology count towards the A Level score.',
+    note: 'One national test for all 37 government medical colleges. O Level must be in the science group and A Level must include Biology, Physics and Chemistry, with at least 3.50 in Biology. The two levels together need 8.50 out of 10, and neither may fall below 4.00. A Level must be from 2024 or 2025, and O Level no earlier than 2022. A DGME equivalence certificate is compulsory before you can even apply.',
     departments: [
-      dept('Bachelor of Medicine & Bachelor of Surgery (MBBS)', 'Medical',
-        [subj('Biology', 'a', 'C'), subj('Chemistry', 'a', 'C'), subj('Physics', 'a', 'C')]),
-      dept('Bachelor of Dental Surgery (BDS)', 'Medical',
-        [subj('Biology', 'a', 'C'), subj('Chemistry', 'a', 'C'), subj('Physics', 'a', 'C')]),
+      dept('Medicine & Surgery (MBBS)', 'Medical',
+        [subj('Biology', 'a', 'U'), subj('Chemistry', 'a', 'U'), subj('Physics', 'a', 'U')],
+        '5,100 seats. Minimums are set in Bangladeshi GPA points after DGME converts your grades, so no letter grade is published to check against here.'),
+      dept('Dental Surgery (BDS)', 'Medical',
+        [subj('Biology', 'a', 'U'), subj('Chemistry', 'a', 'U'), subj('Physics', 'a', 'U')],
+        '545 seats, same test and same eligibility as MBBS.'),
     ],
   },
 ]
-
-export const CATEGORIES: Category[] = [
-  'Engineering', 'Science', 'Business', 'Arts', 'Law',
-  'Pharmacy', 'Architecture', 'Social Science', 'Medical', 'General',
-]
-
-// ---- Awards ----
-export type Award = {
-  name: string
-  body: string
-  criteria: string[]
-  /** Marks-based awards cannot be judged from grades, so they are shown as notes. */
-  infoOnly?: boolean
-  needs?: { level: 'o' | 'a'; count: number; minGrade: string }[]
-  link?: string
-}
-
-export const AWARDS: Award[] = [
-  {
-    name: 'The Daily Star O & A Level Awards',
-    body: 'The Daily Star',
-    criteria: [
-      'Six A grades or above at O Level, across up to two consecutive sessions',
-      'Three A grades or above at A Level, across up to two consecutive sessions',
-    ],
-    needs: [{ level: 'o', count: 6, minGrade: 'A' }, { level: 'a', count: 3, minGrade: 'A' }],
-  },
-  {
-    name: "British Council Scholars' Award",
-    body: 'British Council Bangladesh',
-    criteria: ['Nine A grades or above at O Level in a single session'],
-    needs: [{ level: 'o', count: 9, minGrade: 'A' }],
-  },
-  {
-    name: 'Outstanding Pearson Learner Awards (OPLA)',
-    body: 'Pearson Edexcel',
-    criteria: ['Awarded on exam marks, country-topper style, so it cannot be judged from grades alone'],
-    infoOnly: true,
-  },
-  {
-    name: 'Cambridge Outstanding Learner Awards',
-    body: 'Cambridge International',
-    criteria: ['Awarded on exam marks, country-topper style, so it cannot be judged from grades alone'],
-    infoOnly: true,
-  },
-]
-
-/** How many subjects reach a grade, used for the award checks. */
-export function countAtLeast(entries: Entry[], minGrade: string): number {
-  return entries.filter((e) => e.grade && atLeast(asLetter(e), minGrade)).length
-}
