@@ -5,6 +5,7 @@ import { Home } from '@/pages/Home'
 import { CalculatorPage } from '@/pages/CalculatorPage'
 import { RoutinePage } from '@/pages/RoutinePage'
 import { ExamsPage } from '@/pages/ExamsPage'
+import { LogPage } from '@/pages/LogPage'
 // pdf.js is large, so the practice page loads only when someone opens it.
 const PracticePage = lazy(() => import('@/pages/PracticePage').then((m) => ({ default: m.PracticePage })))
 
@@ -13,6 +14,7 @@ const NAV = [
   { to: '/exams', label: 'Timetable' },
   { to: '/routine', label: 'Routine' },
   { to: '/practice', label: 'Practice' },
+  { to: '/log', label: 'Log' },
 ]
 
 export default function App() {
@@ -38,7 +40,7 @@ function Shell() {
               <Layers size={17} />
             </span>
             <span className="font-display font-bold text-[15px] sm:text-base tracking-tight">
-              Edexcel Toolkit
+              Exam Toolkit
             </span>
           </Link>
 
@@ -59,13 +61,22 @@ function Shell() {
         </div>
       </header>
 
-      <main className="flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <main
+        className={
+          path === '/practice'
+            ? 'flex-1 w-full px-3 sm:px-4 py-4'
+            : 'flex-1 w-full max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12'
+        }
+      >
         <Route path={path} />
       </main>
 
-      <footer className="no-print border-t border-line/50 mt-10">
+      <footer className={'no-print border-t border-line/50 ' + (path === '/practice' ? 'mt-4' : 'mt-10')}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-7 text-xs text-muted flex flex-wrap gap-x-5 gap-y-2 justify-between">
-          <p>Unofficial. Check anything that matters against your statement of results.</p>
+          <p>
+            © {new Date().getFullYear()} Exam Toolkit. All rights reserved.
+            {' '}Unofficial. Check anything that matters against your statement of results.
+          </p>
           <a
             href="https://qualifications.pearson.com/en/support/support-topics/results-certification/grade-boundaries.html"
             target="_blank"
@@ -84,6 +95,7 @@ function Route({ path }: { path: string }) {
   if (path === '/calculator') return <CalculatorPage />
   if (path === '/routine') return <RoutinePage />
   if (path === '/exams') return <ExamsPage />
+  if (path === '/log') return <LogPage />
   if (path === '/practice') {
     return (
       <Suspense fallback={<p className="text-muted py-16 text-center">Loading the paper viewer…</p>}>

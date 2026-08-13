@@ -3,9 +3,11 @@ import { motion } from 'motion/react'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
-export function Card({ className, spotlight, ...p }: React.HTMLAttributes<HTMLDivElement> & { spotlight?: boolean }) {
+export const Card = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement> & { spotlight?: boolean }>(
+  function Card({ className, spotlight, ...p }, ref) {
   return (
     <div
+      ref={ref}
       className={cn(
         'relative overflow-hidden rounded-3xl border border-line/80 bg-card/50 backdrop-blur-xl card-sheen',
         'shadow-[0_1px_0_0_rgba(255,255,255,.05)_inset,0_30px_70px_-34px_rgba(0,0,0,.95)]',
@@ -20,7 +22,7 @@ export function Card({ className, spotlight, ...p }: React.HTMLAttributes<HTMLDi
       {...p}
     />
   )
-}
+})
 
 export function SectionTitle({ icon, title, hint }: { icon?: React.ReactNode; title: string; hint?: string }) {
   return (

@@ -79,11 +79,37 @@ function latestUnit(subject: string, code: string): IalUnit | undefined {
   return variantsFor(subject, list[list.length - 1], code)[0]
 }
 
+/**
+ * Some subject headings only ever covered a stretch of sessions: Pearson's
+ * "(New)" headings from 2019 to 2021, and specifications that have since been
+ * withdrawn. Both leave a session list that stops years ago, which is how a
+ * student ends up calculating against Jan 2021 boundaries without noticing.
+ * Labelling each one with the last sitting it covers makes that obvious in the
+ * dropdown itself.
+ */
+function labelSubjects(names: string[]) {
+  const newest = sortSessions(Object.keys(IAL.sessions)).slice(-1)[0]
+  const lastOf = (subject: string) =>
+    sortSessions(Object.keys(IAL.sessions).filter((s) => IAL.sessions[s][subject])).slice(-1)[0]
+  return names.map((name) => {
+    const last = lastOf(name)
+    return last === newest ? name : `${name} (up to ${last})`
+  })
+}
+
+/** Strip a label back to the key the dataset actually uses. */
+function unlabel(name: string) {
+  return name.replace(/\s*\(up to [A-Za-z]{3} \d{4}\)\s*$/, '')
+}
+
 export function ialView(req: IalRequest): IalView {
   const subjects = ialSubjects(IAL)
-  const subject = subjects.includes(req.subject || '')
-    ? req.subject!
+  const asked = unlabel(req.subject || '')
+  const subject = subjects.includes(asked)
+    ? asked
     : (subjects.includes('Chemistry') ? 'Chemistry' : subjects[0])
+  const labelled = labelSubjects(subjects)
+  const shownSubject = labelled[subjects.indexOf(subject)]
   const level: 'A Level' | 'AS' = req.level === 'AS' ? 'AS' : 'A Level'
   const mode = req.mode === 'raw' ? 'raw' : 'ums'
 
@@ -189,9 +215,9 @@ export function ialView(req: IalRequest): IalView {
   }
 
   return {
-    subjects,
+    subjects: labelled,
     sessions: allSessions,
-    subject,
+    subject: shownSubject,
     level,
     session,
     units,

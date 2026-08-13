@@ -32,7 +32,7 @@ const out = path.join(root, 'api')
 rmSync(out, { recursive: true, force: true })
 mkdirSync(out, { recursive: true })
 
-const handlers = ['ial', 'igcse', 'forecast', 'refresh', 'routine', 'exams']
+const handlers = ['ial', 'igcse', 'forecast', 'refresh', 'routine', 'exams', 'papers', 'paper', 'unlock']
 
 await Promise.all(handlers.map((name) =>
   build({
@@ -45,6 +45,10 @@ await Promise.all(handlers.map((name) =>
     minify: true,
     legalComments: 'none',
     logLevel: 'error',
+    // The S3 client is a bare package import, which Vercel resolves from
+    // node_modules on its own. Inlining it would add a megabyte to every
+    // function that touches storage for no benefit.
+    external: ['@aws-sdk/*'],
     plugins: [fastJson],
   })))
 

@@ -46,7 +46,14 @@ export function RoutinePage() {
   }, [entries, hours, series])
 
   const body = useMemo(
-    () => ({ subjects: entries, hours, startDate: today(), series }),
+    // Exam dates come from Pearson's published timetable for the chosen series,
+    // never from the student, so any old manually-entered date is dropped here.
+    () => ({
+      subjects: entries.map((e) => ({ subject: e.subject, units: e.units })),
+      hours,
+      startDate: today(),
+      series,
+    }),
     [entries, hours, series],
   )
   const { data: view, error } = useApi<RoutineView>('/api/routine', body, 250)
@@ -113,14 +120,12 @@ export function RoutinePage() {
                   )}
                 </div>
 
-                <Field label="Exam date" hint={entry.examDate ? undefined : 'Set from the series'}>
-                  <input
-                    type="date"
-                    value={entry.examDate || autoDate(view, entry.subject) || ''}
-                    min={today()}
-                    onChange={(e) => update(i, { examDate: e.target.value })}
-                    className="h-10 w-full rounded-xl bg-black/25 border border-line px-3 text-sm text-ink outline-none focus:border-brand"
-                  />
+                <Field label="Exam date" hint="From Pearson's published timetable">
+                  <div className="h-10 w-full rounded-xl bg-black/25 border border-line px-3 flex items-center text-sm">
+                    {autoDate(view, entry.subject)
+                      ? <span className="text-ink">{formatExamDate(autoDate(view, entry.subject)!)}</span>
+                      : <span className="text-muted">Not sat in this series</span>}
+                  </div>
                 </Field>
 
                 <button
@@ -330,6 +335,14 @@ function blockTimes(sessions: RoutineView['days'][number]['sessions'], startHour
 
 function autoDate(view: RoutineView, subject: string) {
   return view.perSubject.find((s) => s.subject === subject)?.examDate
+}
+
+/** Pearson's date (YYYY-MM-DD) shown as e.g. "Fri 22 Jan 2027". */
+function formatExamDate(iso: string) {
+  const d = new Date(iso + 'T00:00:00')
+  return Number.isNaN(d.getTime())
+    ? iso
+    : d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' })
 }
 
 function pickNext(all: string[], chosen: Entry[]) {

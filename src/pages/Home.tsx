@@ -64,14 +64,14 @@ export function Home() {
         className="mb-10 sm:mb-12"
       >
         <h1 className="font-display text-3xl sm:text-[3rem] font-bold tracking-tight leading-[1.08] max-w-3xl">
-          Everything for Edexcel,{' '}
+          Everything for your exams,{' '}
           <span className="reveal-line bg-[linear-gradient(110deg,#5eead4,#38bdf8,#a78bfa,#fcd34d,#5eead4)] bg-clip-text text-transparent">
             in one place
           </span>
         </h1>
         <p className="text-muted mt-4 max-w-xl leading-relaxed">
-          Four tools for International A Level and International GCSE. Free, no account, no ads.
-          Pick one.
+          Past papers for Edexcel and Cambridge, plus grade tools for International A Level and IGCSE.
+          Free, no account, no ads.
         </p>
       </motion.section>
 

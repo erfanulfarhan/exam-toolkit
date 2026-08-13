@@ -159,65 +159,85 @@ select option {
   .reveal-line { animation: none; }
 }
 
+
 /* ---------- Print ----------
-   A printed routine has to survive being folded into a blazer pocket and
-   scribbled on, so print gets its own layout: white ground, black text, no app
-   chrome, and the table allowed to break across pages at row boundaries. */
+   The routine prints as an agenda, not a grid: hairline rules instead of boxed
+   cells, large dates, and week groupings. Black on white, no app chrome. */
 @media print {
   .mesh,
   .grain,
-  .no-print {
-    display: none !important;
-  }
+  .no-print { display: none !important; }
 
-  html,
-  body {
-    background: #fff !important;
-    color: #000 !important;
-  }
+  html, body { background: #fff !important; color: #000 !important; }
+  main { max-width: none !important; padding: 0 !important; }
+  .print-sheet { display: block !important; }
 
-  .print-sheet {
-    display: block !important;
-  }
-
-  main {
-    max-width: none !important;
-    padding: 0 !important;
-  }
-
-  .print-table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  .print-table th,
-  .print-table td {
-    border: 1px solid #000;
-    padding: 7px 9px;
-    text-align: left;
-    font-size: 11pt;
-    vertical-align: top;
-  }
-  .print-table th {
-    font-size: 8pt;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-  .print-table tr {
-    break-inside: avoid;
-  }
-  .print-table thead {
-    display: table-header-group;
-  }
-
-  .print-box {
-    border: 1px solid #000;
-  }
-
-  @page {
-    margin: 14mm;
-  }
+  @page { margin: 13mm; }
 }
 
-.print-sheet {
-  display: none;
+.print-sheet { display: none; color: #000; font-size: 10pt; }
+
+.pr-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding-bottom: 7px;
+  border-bottom: 2px solid #000;
 }
+.pr-title { font-size: 19pt; font-weight: 700; letter-spacing: -0.02em; line-height: 1; }
+.pr-sub { font-size: 8.5pt; margin-top: 3px; }
+.pr-stats { display: flex; gap: 14px; font-size: 8.5pt; }
+
+.pr-fields { display: flex; gap: 22px; margin: 10px 0 12px; font-size: 8pt; text-transform: uppercase; letter-spacing: 0.07em; }
+.pr-fields span { display: flex; align-items: baseline; gap: 6px; flex: 1; }
+.pr-fields i { flex: 1; border-bottom: 1px dotted #555; height: 12px; }
+
+.pr-span { position: relative; margin: 0 0 16px; padding-top: 4px; }
+.pr-span-rule { height: 1px; background: #000; }
+.pr-span-tick {
+  position: absolute;
+  top: 0;
+  width: 1px;
+  height: 9px;
+  background: #000;
+}
+.pr-span-ends { display: flex; justify-content: space-between; font-size: 7.5pt; margin-top: 3px; }
+
+.pr-week { break-inside: avoid; margin-bottom: 12px; }
+.pr-week-label {
+  font-size: 7.5pt;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-bottom: 1px solid #000;
+  padding-bottom: 2px;
+  margin-bottom: 5px;
+}
+
+.pr-day {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid #d4d4d4;
+  break-inside: avoid;
+}
+.pr-date { width: 44px; flex: none; text-align: center; }
+.pr-date-num { display: block; font-size: 17pt; font-weight: 700; line-height: 0.95; }
+.pr-date-day { display: block; font-size: 7pt; text-transform: uppercase; letter-spacing: 0.08em; }
+
+.pr-papers { flex: 1; min-width: 0; }
+.pr-paper + .pr-paper { margin-top: 6px; padding-top: 6px; border-top: 1px dotted #bbb; }
+.pr-meta { display: flex; align-items: center; gap: 8px; font-size: 8pt; }
+.pr-dot { width: 7px; height: 7px; border-radius: 50%; border: 1.2px solid #000; background: #000; flex: none; }
+.pr-dot-am { background: #fff; }
+.pr-when { font-weight: 700; letter-spacing: 0.06em; }
+.pr-code { font-family: ui-monospace, monospace; }
+.pr-name { font-size: 10pt; margin-top: 2px; }
+
+.pr-tick { width: 15px; height: 15px; border: 1.2px solid #000; flex: none; margin-top: 4px; }
+
+.pr-notes { margin-top: 14px; break-inside: avoid; }
+.pr-notes-label { font-size: 7.5pt; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 7px; }
+.pr-rule { border-bottom: 1px solid #d4d4d4; height: 17px; }
+
+.pr-foot { margin-top: 12px; font-size: 7.5pt; border-top: 1px solid #000; padding-top: 5px; }

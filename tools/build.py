@@ -27,6 +27,11 @@ def tidy(name):
     # text layers, "Applied ICT: ANpepwl ieSdp eICciTfic: aNtieown Specification".
     name = re.sub(r":\s*\S.*\bSpecification\s*$", "", name, flags=re.I)
     name = re.sub(r"\s*\(Continued\)\s*$", "", name, flags=re.I)
+    # Around 2019-2021 Pearson headed the then-new specification "X (New)" and
+    # later dropped the suffix. Same subject, same unit codes, so keeping both
+    # split one subject in two and left students picking a list that stopped at
+    # Jan 2021. Fold it back in.
+    name = re.sub(r"\s*\(New\)\s*$", "", name, flags=re.I)
     name = name.replace(" & ", " and ")
     # "Chemistry Chemistry" -> "Chemistry"
     half = len(name) // 2
