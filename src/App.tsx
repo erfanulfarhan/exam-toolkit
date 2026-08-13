@@ -6,6 +6,7 @@ import { CalculatorPage } from '@/pages/CalculatorPage'
 import { RoutinePage } from '@/pages/RoutinePage'
 import { ExamsPage } from '@/pages/ExamsPage'
 import { LogPage } from '@/pages/LogPage'
+import { GpaPage } from '@/pages/GpaPage'
 // pdf.js is large, so the practice page loads only when someone opens it.
 const PracticePage = lazy(() => import('@/pages/PracticePage').then((m) => ({ default: m.PracticePage })))
 
@@ -14,6 +15,7 @@ const NAV = [
   { to: '/exams', label: 'Timetable' },
   { to: '/routine', label: 'Routine' },
   { to: '/practice', label: 'Practice' },
+  { to: '/gpa', label: 'GPA' },
   { to: '/log', label: 'Log' },
 ]
 
@@ -96,6 +98,7 @@ function Route({ path }: { path: string }) {
   if (path === '/routine') return <RoutinePage />
   if (path === '/exams') return <ExamsPage />
   if (path === '/log') return <LogPage />
+  if (path === '/gpa') return <GpaPage />
   if (path === '/practice') {
     return (
       <Suspense fallback={<p className="text-muted py-16 text-center">Loading the paper viewer…</p>}>
