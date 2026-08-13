@@ -754,7 +754,7 @@ function Faq() {
           <Card key={item.q} className="overflow-hidden">
             <button
               onClick={() => setOpen(open === i ? null : i)}
-              className="w-full flex items-center justify-between gap-3 p-4 text-left hover:bg-white/[0.03] transition-colors"
+              className="w-full flex items-center justify-between gap-3 p-4 text-left rounded-2xl hover:bg-white/[0.015] transition-colors"
             >
               <span className="font-semibold text-sm">{item.q}</span>
               <ChevronDown
@@ -771,7 +771,7 @@ function Faq() {
                   transition={{ duration: 0.26, ease: [0.22, 1, 0.36, 1] }}
                   className="overflow-hidden"
                 >
-                  <p className="px-4 pb-4 -mt-1 text-sm text-muted leading-relaxed max-w-3xl">{item.a}</p>
+                  <p className="px-4 pb-4 pt-1.5 text-sm text-muted leading-relaxed max-w-3xl">{item.a}</p>
                 </motion.div>
               )}
             </AnimatePresence>
