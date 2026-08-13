@@ -334,7 +334,7 @@ function Eligibility({ o, a }: { o: Entry[]; a: Entry[] }) {
       )}
 
       {entered > 0 && (totals.yes > 0 || withinReach.length > 0) && (
-        <div className="mt-8 rounded-2xl border border-line bg-gradient-to-br from-amber-400/[0.07] to-transparent p-5">
+        <div className="mt-8 rounded-2xl border border-line bg-gradient-to-br from-[#0047AB]/[0.12] to-transparent p-5">
           <div className="flex flex-wrap items-baseline gap-x-8 gap-y-3">
             <div>
               <div className={'font-display font-bold text-4xl leading-none ' + TONES.emerald.text}>

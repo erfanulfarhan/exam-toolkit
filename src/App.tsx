@@ -38,7 +38,7 @@ function Shell() {
       <header className="no-print sticky top-0 z-30 border-b border-line/50 bg-bg/70 backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
           <Link to="/" className="flex items-center gap-2.5 shrink-0">
-            <span className="grid place-items-center h-9 w-9 rounded-xl bg-gradient-to-br from-[#CFFFDC] via-[#68BA7F] to-[#2E6F40] text-[#14251a] shadow-lg shadow-[#2E6F40]/40">
+            <span className="grid place-items-center h-9 w-9 rounded-xl bg-gradient-to-br from-[#82C8E5] via-[#0047AB] to-[#000080] text-white shadow-lg shadow-[#0047AB]/40">
               <Layers size={17} />
             </span>
             <span className="font-display font-bold text-[15px] sm:text-base tracking-tight">

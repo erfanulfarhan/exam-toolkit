@@ -9,14 +9,14 @@ export default {
         sans: ['Inter', 'system-ui', 'sans-serif'],
       },
       colors: {
-        // Lush forest. The ground is a shade below the palette's darkest so
-        // cards lift off it, and the pale mint carries body text at a weight
-        // that stays readable on green rather than glaring.
-        bg: '#141f18', card: '#1c2c21', line: '#2f4a37',
-        ink: '#e8fbee', muted: '#9dbfa8',
-        brand: { DEFAULT: '#68BA7F', 2: '#CFFFDC', 3: '#2E6F40' },
-        forest: { deep: '#253D2C', dark: '#2E6F40', mid: '#68BA7F', light: '#CFFFDC' },
-        good: '#68BA7F', warn: '#e3c770', bad: '#e88a8a',
+        // Cobalt sky. Navy is the ground rather than an accent, so cobalt and
+        // the pale sky read as light against it; the slate carries secondary
+        // text without competing with either.
+        bg: '#080d1c', card: '#101a33', line: '#24365c',
+        ink: '#eaf3fb', muted: '#8fa3bf',
+        brand: { DEFAULT: '#0047AB', 2: '#82C8E5', 3: '#000080' },
+        cobalt: { navy: '#000080', deep: '#0047AB', sky: '#82C8E5', slate: '#6D8196' },
+        good: '#82C8E5', warn: '#e0b978', bad: '#e88a8a',
       },
       borderRadius: { xl: '1rem', '2xl': '1.35rem' },
     },

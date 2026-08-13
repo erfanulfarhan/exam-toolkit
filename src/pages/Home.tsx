@@ -98,12 +98,12 @@ export function Home() {
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         className="mb-10 sm:mb-12"
       >
-        <p className="text-[11px] font-semibold uppercase tracking-[.16em] text-[#68BA7F] mb-4">
+        <p className="text-[11px] font-semibold uppercase tracking-[.16em] text-[#82C8E5] mb-4">
           Edexcel and Cambridge · International A Level and IGCSE
         </p>
         <h1 className="font-display text-4xl sm:text-[3.4rem] font-bold tracking-tight leading-[1.05] max-w-4xl">
           Every past paper,{' '}
-          <span className="reveal-line bg-[linear-gradient(110deg,#CFFFDC,#68BA7F,#2E6F40,#8fd6a4,#CFFFDC)] bg-clip-text text-transparent">
+          <span className="reveal-line bg-[linear-gradient(110deg,#82C8E5,#0047AB,#000080,#6D8196,#82C8E5)] bg-clip-text text-transparent">
             marked honestly
           </span>
         </h1>
@@ -116,13 +116,13 @@ export function Home() {
         <div className="flex flex-wrap items-center gap-3 mt-7">
           <Link
             to="/practice"
-            className="h-12 px-6 rounded-2xl bg-gradient-to-br from-[#CFFFDC] to-[#68BA7F] text-[#14251a] text-sm font-bold inline-flex items-center gap-2 hover:brightness-105 hover:-translate-y-0.5 transition-all shadow-lg shadow-[#2E6F40]/30"
+            className="h-12 px-6 rounded-2xl bg-gradient-to-br from-[#0047AB] to-[#000080] text-white text-sm font-bold inline-flex items-center gap-2 hover:brightness-125 hover:-translate-y-0.5 transition-all shadow-lg shadow-[#0047AB]/40"
           >
             Start practising <ArrowRight size={16} />
           </Link>
           <Link
             to="/gpa"
-            className="h-12 px-6 rounded-2xl border border-line text-sm font-bold inline-flex items-center gap-2 hover:border-[#68BA7F]/60 hover:-translate-y-0.5 transition-all"
+            className="h-12 px-6 rounded-2xl border border-line text-sm font-bold inline-flex items-center gap-2 hover:border-[#82C8E5]/60 hover:-translate-y-0.5 transition-all"
           >
             Where do my grades get me?
           </Link>
@@ -148,7 +148,7 @@ export function Home() {
         <ol className="grid sm:grid-cols-3 gap-5 sm:gap-6 mt-6">
           {STEPS.map((step, i) => (
             <li key={step.title} className="relative">
-              <span className="inline-grid place-items-center h-8 w-8 rounded-xl bg-[#68BA7F]/15 border border-[#68BA7F]/30 text-[#CFFFDC] font-display font-bold text-sm mb-3">
+              <span className="inline-grid place-items-center h-8 w-8 rounded-xl bg-[#0047AB]/20 border border-[#82C8E5]/30 text-[#82C8E5] font-display font-bold text-sm mb-3">
                 {i + 1}
               </span>
               <h3 className="font-semibold text-sm">{step.title}</h3>
