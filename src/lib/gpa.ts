@@ -54,7 +54,7 @@ const NUMERIC_AS_LETTER: Record<string, string> = {
  */
 export const POINT_SETS = {
   standard: { 'A*': 5, A: 5, B: 4, C: 3, D: 2, E: 1, F: 0, G: 0, U: 0 },
-  iba: { 'A*': 5, A: 5, B: 4, C: 3, D: 0, E: 0, F: 0, G: 0, U: 0 },
+  iba: { 'A*': 5, A: 5, B: 4, C: 3.5, D: 0, E: 0, F: 0, G: 0, U: 0 },
   // BUP publishes its own points and says outright that anything below D is not
   // counted. Seven subjects at five points is the ceiling, so the total tops out
   // at 35 and the pass mark of 26.5 sits just under four fifths of it.
@@ -164,7 +164,7 @@ export function allScales(oLevels: Entry[], aLevels: Entry[]): ScaleResult[] {
     {
       key: 'iba',
       name: 'IBA, Dhaka University',
-      note: "Dhaka University's circular scores A at 5, B at 4, C at 3, and a D at nothing at all.",
+      note: "Dhaka University's circular scores A at 5, B at 4 and C at 3.5, and a D at nothing at all.",
       o: ibaO,
       a: ibaA,
     },
