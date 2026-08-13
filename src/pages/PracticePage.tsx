@@ -348,10 +348,11 @@ export function PracticePage() {
           height={paneHeight}
           // Jumping to a question is useful in both modes: full paper view
           // still benefits from being able to land on question 12 directly.
-          // Nothing reports the scroll position back, so reading down the paper
-          // never drags the mark scheme along with it.
+          // Reading down the paper also reports which question you have reached,
+          // so the mark scheme keeps pace instead of being left behind.
           scrollTo={qpScrollTo}
           onScrolledTo={() => setQpScrollTo(null)}
+          onVisibleQuestion={setCurrent}
         />
 
         <div className="relative min-w-0">
@@ -362,10 +363,12 @@ export function PracticePage() {
             paper={ms}
             question={mode === 'question' ? current : undefined}
             slice={gated && mode === 'question' ? sliceFor(ms, current, manual) : null}
-            // Locking on shows the current question as a slice. Whenever the
-            // whole scheme is on show instead (locking off, or full paper mode)
-            // it follows the question you click, and otherwise stays put.
-            scrollTo={!gated || mode === 'full' ? msScrollTo : null}
+            // Locking on shows the current question as a slice, which changes
+            // with the question and re-locks anything not yet attempted. With
+            // the whole scheme on show it scrolls to whichever question you have
+            // reached, whether you clicked a number or scrolled to it, so coming
+            // back up to a question you have already done lands on its answer.
+            scrollTo={!gated || mode === 'full' ? (msScrollTo ?? current) : null}
             onScrolledTo={() => setMsScrollTo(null)}
             onSetAnchor={gated && mode === 'question'
               ? (page, y) => setManual((m) => ({ ...m, [current]: { page, y } }))
