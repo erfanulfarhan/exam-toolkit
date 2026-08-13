@@ -1,5 +1,5 @@
 import { motion } from 'motion/react'
-import { ArrowRight, CalendarCheck, CalendarRange, Calculator, FileText, GraduationCap } from 'lucide-react'
+import { ArrowRight, CalendarCheck, CalendarRange, Calculator, FileText, GraduationCap, LineChart } from 'lucide-react'
 import { Card, TONES, Tone } from '@/components/ui'
 import { Link } from '@/lib/router'
 
@@ -50,6 +50,16 @@ const TOOLS: {
     blurb:
       'Tick your subjects and get only your papers, in order, with dates, sessions and durations, plus a countdown to the first one and any clashes flagged.',
     points: ['From Pearson\'s published timetable', 'Clash detection', 'Feeds your routine automatically'],
+    ready: true,
+  },
+  {
+    to: '/log',
+    tone: 'rose',
+    icon: <LineChart size={20} />,
+    title: 'Practice log',
+    blurb:
+      'Every paper you have marked, how your scores are moving, and the units worth another go. It fills itself in as you practise.',
+    points: ['Written as you mark', 'Real grades, not just marks', 'Weakest units first'],
     ready: true,
   },
   {
