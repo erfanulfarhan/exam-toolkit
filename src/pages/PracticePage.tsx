@@ -40,7 +40,7 @@ export function PracticePage() {
   // percentage and grade alongside the raw total.
   const [result, setResult] = useState<MarkResult | null>(null)
   const [progress, setProgress] = useState<Progress>({})
-  const [stacked, setStacked] = useState(false)
+  const [stacked, setStacked] = useState(() => window.innerWidth < 1024)
   // The subject's other papers, docked beside the viewer. Open by default where
   // there is room for a column, closed on a phone where it would be a drawer
   // over the paper.
