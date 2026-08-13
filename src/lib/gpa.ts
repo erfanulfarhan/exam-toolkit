@@ -55,6 +55,10 @@ const NUMERIC_AS_LETTER: Record<string, string> = {
 export const POINT_SETS = {
   standard: { 'A*': 5, A: 5, B: 4, C: 3, D: 2, E: 1, F: 0, G: 0, U: 0 },
   iba: { 'A*': 5, A: 5, B: 4, C: 3.5, D: 0, E: 0, F: 0, G: 0, U: 0 },
+  // BUP publishes its own points and says outright that anything below D is not
+  // counted. Seven subjects at five points is the ceiling, so the total tops out
+  // at 35 and the pass mark of 26.5 sits just under four fifths of it.
+  bup: { 'A*': 5, A: 5, B: 4, C: 3.5, D: 3, E: 0, F: 0, G: 0, U: 0 },
 } as const satisfies Record<string, Record<string, number>>
 
 export type PointSet = keyof typeof POINT_SETS
@@ -113,10 +117,17 @@ export type ScaleResult = {
 export function allScales(oLevels: Entry[], aLevels: Entry[]): ScaleResult[] {
   const standardO = best(oLevels, 'o').gpa
   const standardA = best(aLevels, 'a').gpa
+  // BRAC discards an E at O Level but scores it a point at A Level: the scales
+  // it publishes for the two levels genuinely differ.
   const bracO = best(oLevels, 'o', true).gpa
-  const bracA = best(aLevels, 'a', true).gpa
+  const bracA = best(aLevels, 'a').gpa
   const ibaO = best(oLevels, 'o', false, 'iba').gpa
   const ibaA = best(aLevels, 'a', false, 'iba').gpa
+  // BUP totals points over the seven counted subjects rather than averaging.
+  const bupO = best(oLevels, 'o', false, 'bup')
+  const bupA = best(aLevels, 'a', false, 'bup')
+  const bupTotal = [...bupO.counting, ...bupA.counting]
+    .reduce((sum, e) => sum + pointsOf(e, 'bup'), 0)
   return [
     {
       key: 'standard',
@@ -128,7 +139,7 @@ export function allScales(oLevels: Entry[], aLevels: Entry[]): ScaleResult[] {
     {
       key: 'brac',
       name: 'BRAC University',
-      note: 'The same points, but subjects graded E are dropped before averaging rather than scoring one.',
+      note: 'BRAC asks for 2.50 at each level. An E is discarded at O Level, but still scores a point at A Level.',
       o: bracO,
       a: bracA,
     },
@@ -144,10 +155,10 @@ export function allScales(oLevels: Entry[], aLevels: Entry[]): ScaleResult[] {
     {
       key: 'bup',
       name: 'BUP points total',
-      note: 'BUP does not average at all. It totals points across your subjects and asks for 26.5 or above.',
-      o: standardO,
-      a: standardA,
-      combined: (standardO + standardA) * 5,
+      note: 'BUP does not average. It totals points over five O Levels and two A Levels on its own scale, where a C is 3.5 and anything below D scores nothing, and asks for 26.5 out of a possible 35.',
+      o: bupO.gpa,
+      a: bupA.gpa,
+      combined: bupTotal,
       threshold: 26.5,
     },
     {

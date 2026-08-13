@@ -92,7 +92,7 @@ export function GpaPage() {
                 {s.threshold != null && (
                   <div className={'text-xs font-semibold mt-2 ' + (s.combined >= s.threshold ? 'text-emerald-400' : 'text-muted')}>
                     {s.combined >= s.threshold ? 'Meets the ' : 'Below the '}
-                    {s.threshold.toFixed(2)} AUST asks for
+                    {s.threshold.toFixed(2)} needed
                   </div>
                 )}
               </>
