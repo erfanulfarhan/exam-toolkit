@@ -46,14 +46,16 @@ function Shell() {
             </span>
           </Link>
 
-          <nav className="flex items-center gap-1">
+          <nav className="flex items-center gap-1 -mx-1 px-1 overflow-x-auto no-scrollbar">
             {NAV.map((item) => (
               <Link
                 key={item.to}
                 to={item.to}
                 className={
-                  'rounded-lg px-2.5 sm:px-3 h-8 inline-flex items-center text-xs sm:text-sm font-semibold transition-colors ' +
-                  (path === item.to ? 'bg-white/[.07] text-ink' : 'text-muted hover:text-ink')
+                  'relative shrink-0 rounded-lg px-2.5 sm:px-3 h-8 inline-flex items-center text-xs sm:text-sm font-semibold transition-all ' +
+                  (path === item.to
+                    ? 'bg-white/[.09] text-ink shadow-[0_0_0_1px_rgba(255,255,255,.06)_inset]'
+                    : 'text-muted hover:text-ink hover:bg-white/[.04]')
                 }
               >
                 {item.label}
