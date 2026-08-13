@@ -35,7 +35,7 @@ export function GpaPage() {
         return raw
       }
     } catch { /* fall through to a blank sheet */ }
-    return { o: [make('o')], a: [make('a')] }
+    return { o: [], a: [] }
   })
 
   useEffect(() => { localStorage.setItem(STORE, JSON.stringify(rows)) }, [rows])
@@ -168,16 +168,15 @@ function Panel({
         </div>
       </div>
 
-      <div className="space-y-2.5">
+      <SubjectSearch level={level} taken={entries.map((e) => e.subject)} onAdd={onAdd} />
+
+      <div className="space-y-2.5 mt-3">
         {entries.map((entry, i) => (
           <div key={entry.id} className="rounded-2xl border border-line/70 bg-black/20 p-3">
             <div className="flex items-center gap-2 mb-2.5">
-              <input
-                value={entry.subject}
-                onChange={(e) => onUpdate(level, entry.id, { subject: e.target.value })}
-                placeholder={`Subject ${i + 1}, e.g. Physics`}
-                className="flex-1 min-w-0 h-9 px-3 rounded-xl border border-line bg-black/25 text-sm outline-none focus:border-teal-400/60 transition-colors"
-              />
+              <span className="flex-1 min-w-0 truncate text-sm font-semibold">
+                {entry.subject || `Subject ${i + 1}`}
+              </span>
               {entry.grade && (
                 <span className={
                   'shrink-0 text-[10px] font-bold uppercase tracking-wide px-2 py-1 rounded-md border ' +
@@ -245,8 +244,6 @@ function Panel({
           </div>
         ))}
       </div>
-
-      <SubjectSearch level={level} taken={entries.map((e) => e.subject)} onAdd={onAdd} />
 
       {counted.counting.length > 0 && (
         <div className="mt-4 pt-3 border-t border-line/60">
@@ -554,7 +551,13 @@ function SubjectSearch({
   const [board, setBoard] = useState<Board>('edexcel')
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState(false)
-  const matches = useMemo(() => suggest(board, level, query).slice(0, 8), [board, level, query])
+  const matches = useMemo(() => {
+    const found = suggest(board, level, query)
+    const q = query.trim().toLowerCase()
+    // Typing a name in full should leave that name, not everything sharing a word.
+    const exact = found.filter((f) => f.toLowerCase() === q)
+    return (exact.length ? exact : found).slice(0, 8)
+  }, [board, level, query])
   const has = (name: string) => taken.some((t) => t.toLowerCase() === name.toLowerCase())
 
   const choose = (name: string) => {
