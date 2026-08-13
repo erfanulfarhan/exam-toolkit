@@ -402,7 +402,7 @@ function Eligibility({ o, a }: { o: Entry[]; a: Entry[] }) {
             onClick={() => setCategory(c as Category | 'all')}
             className={
               'h-7 px-2.5 rounded-lg text-[11px] font-semibold border transition-colors ' +
-              (category === c ? 'border-teal-400/60 bg-teal-400/15 text-ink' : 'border-line text-muted hover:text-ink')
+              (category === c ? 'border-teal-400/60 bg-[#0047AB]/25 text-ink' : 'border-line text-muted hover:text-ink')
             }
           >
             {c === 'all' ? 'All subjects' : c}
@@ -463,7 +463,7 @@ function Eligibility({ o, a }: { o: Entry[]; a: Entry[] }) {
                         <span className={
                           'shrink-0 text-[10px] font-bold px-2 py-1 rounded-md border ' +
                           (verdict.eligible
-                            ? 'bg-emerald-400/15 text-emerald-300 border-emerald-400/40'
+                            ? 'bg-emerald-400/15 text-[#82C8E5] border-emerald-400/40'
                             : 'bg-rose-400/10 text-rose-300 border-rose-400/30')
                         }>
                           {verdict.eligible ? 'Eligible' : 'Not eligible'}
@@ -524,7 +524,7 @@ function Awards({ o, a }: { o: Entry[]; a: Entry[] }) {
                   (award.infoOnly
                     ? 'text-muted border-line'
                     : met
-                      ? 'bg-emerald-400/15 text-emerald-300 border-emerald-400/40'
+                      ? 'bg-emerald-400/15 text-[#82C8E5] border-emerald-400/40'
                       : 'text-muted border-line')
                 }>
                   {award.infoOnly ? 'Info only' : met ? 'Grades met' : missingSittings ? 'Sittings needed' : 'Not yet'}
@@ -542,7 +542,7 @@ function Awards({ o, a }: { o: Entry[]; a: Entry[] }) {
                   {checks.map((c) => (
                     <span key={c.level} className="text-[11px] tabular-nums">
                       <span className="text-muted">{c.level === 'o' ? 'O Level' : 'A Level'} </span>
-                      <b className={c.have >= c.count ? 'text-emerald-300' : 'text-muted'}>
+                      <b className={c.have >= c.count ? 'text-[#82C8E5]' : 'text-muted'}>
                         {c.have}/{c.count}
                       </b>
                       <span className="text-muted">

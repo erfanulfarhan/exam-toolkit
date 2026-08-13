@@ -76,7 +76,7 @@ export function RoutinePage() {
       >
         <h1 className="font-display text-3xl sm:text-[2.75rem] font-bold tracking-tight leading-[1.1] max-w-2xl">
           A routine built around{' '}
-          <span className="bg-gradient-to-r from-amber-300 to-orange-500 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-[#82C8E5] to-[#0047AB] bg-clip-text text-transparent">
             the units you dread
           </span>
         </h1>

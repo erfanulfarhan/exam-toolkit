@@ -187,7 +187,7 @@ export function MarkPaper({
             <Meter value={unit.ums} max={unit.umsMax} tone="teal" />
             <p className="text-xs text-muted mt-2 leading-relaxed">
               {unit.title}. Put this UMS into the{' '}
-              <a href="/calculator" className="text-teal-300 font-semibold hover:text-teal-200">calculator</a>{' '}
+              <a href="/calculator" className="text-[#82C8E5] font-semibold hover:text-teal-200">calculator</a>{' '}
               with your other units for the overall grade.
             </p>
           </div>

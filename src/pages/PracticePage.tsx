@@ -179,7 +179,7 @@ export function PracticePage() {
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] font-semibold uppercase tracking-[.09em] text-muted mb-1">
                 <span className="text-[#82C8E5]">{paperMeta.level}</span>
                 <span>·</span><span>{paperMeta.subject}</span>
-                {sessionLabel(paperMeta) && (<><span>·</span><span className="text-violet-300">{sessionLabel(paperMeta)}</span></>)}
+                {sessionLabel(paperMeta) && (<><span>·</span><span className="text-[#82C8E5]">{sessionLabel(paperMeta)}</span></>)}
               </div>
               <h1 className="font-display text-2xl sm:text-3xl font-bold tracking-tight">
                 {paperMeta.subject} {paperMeta.unit}
@@ -286,7 +286,7 @@ export function PracticePage() {
                 (n === current
                   ? 'border-violet-400/60 bg-[#0047AB]/30 text-ink'
                   : attempted(n)
-                    ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300'
+                    ? 'border-emerald-400/30 bg-emerald-400/10 text-[#82C8E5]'
                     : 'border-line bg-black/25 text-muted hover:text-ink')
               }
             >
