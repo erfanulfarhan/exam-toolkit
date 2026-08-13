@@ -15,6 +15,10 @@ export function ExamsPage() {
   }, [])
   const [series, setSeries] = useState<string | undefined>(saved?.series)
   const [subjects, setSubjects] = useState<string[]>(saved?.subjects || [])
+  // Papers the student is not sitting. Held as an exclusion list so ticking a
+  // new subject brings all of its papers in by default: most people sit most of
+  // a subject, and the ones dropping a unit know exactly which.
+  const [dropped, setDropped] = useState<string[]>(saved?.dropped || [])
 
   const body = useMemo(() => ({ series, subjects }), [series, subjects])
   const { data: view, error } = useApi<ExamsView>('/api/exams', body, 150)
@@ -24,17 +28,26 @@ export function ExamsPage() {
       ? subjects.filter((s) => s !== subject)
       : [...subjects, subject]
     setSubjects(next)
-    localStorage.setItem(STORE, JSON.stringify({ series: view?.series, subjects: next }))
+    localStorage.setItem(STORE, JSON.stringify({ series: view?.series, subjects: next, dropped }))
+  }
+
+  const keyOf = (e: { code: string; paper: string }) => `${e.code}/${e.paper}`
+  const toggleUnit = (key: string) => {
+    const next = dropped.includes(key) ? dropped.filter((k) => k !== key) : [...dropped, key]
+    setDropped(next)
+    localStorage.setItem(STORE, JSON.stringify({ series: view?.series, subjects, dropped: next }))
   }
 
   if (error) return <Card className="p-5 text-rose-400">Could not load the timetable. Try again.</Card>
   if (!view) return <p className="text-muted py-16 text-center">Loading…</p>
 
-  const byDate = groupByDate(view.exams)
+  const sitting = view.exams.filter((e) => !dropped.includes(`${e.code}/${e.paper}`))
+  const shown = { ...view, exams: sitting, summary: summarise(sitting) }
+  const byDate = groupByDate(sitting)
 
   return (
     <>
-      <PrintRoutine view={view} />
+      <PrintRoutine view={shown} />
 
       <div className="no-print">
       <motion.section
@@ -105,6 +118,50 @@ export function ExamsPage() {
         </div>
 
         <div className="space-y-5 min-w-0">
+          {!!subjects.length && view.available.some((u) => subjects.includes(u.subject)) && (
+            <Card className="p-5 mb-4">
+              <div className="text-[11px] font-semibold uppercase tracking-[.09em] text-muted">
+                Papers you are sitting
+              </div>
+              <p className="text-xs text-muted/80 mt-1 mb-3">
+                Everything is included to start with. Untick anything you are not sitting and it
+                leaves your timetable and your printout.
+              </p>
+              <div className="space-y-3">
+                {subjects.map((subject) => {
+                  const units = view.available.filter((u) => u.subject === subject)
+                  if (!units.length) return null
+                  return (
+                    <div key={subject}>
+                      <div className="text-xs font-semibold mb-1.5">{subject}</div>
+                      <div className="flex flex-wrap gap-1.5">
+                        {units.map((u) => {
+                          const key = `${u.code}/${u.paper}`
+                          const on = !dropped.includes(key)
+                          return (
+                            <button
+                              key={key}
+                              onClick={() => toggleUnit(key)}
+                              title={u.title}
+                              className={
+                                'h-8 px-2.5 rounded-lg text-[11px] font-semibold border transition-colors ' +
+                                (on
+                                  ? 'border-[#82C8E5]/50 bg-[#0047AB]/25 text-ink'
+                                  : 'border-line text-muted/70 hover:text-ink line-through')
+                              }
+                            >
+                              {u.code}/{u.paper}
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </Card>
+          )}
+
           {!subjects.length && (
             <Card className="p-8 text-center">
               <p className="text-muted">Tick a subject to build your timetable.</p>
@@ -133,16 +190,16 @@ export function ExamsPage() {
                 </button>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <Stat label="Papers" value={String(view.summary.papers)} />
-                <Stat label="Time in exams" value={duration(view.summary.minutes)} />
+                <Stat label="Papers" value={String(shown.summary.papers)} />
+                <Stat label="Time in exams" value={duration(shown.summary.minutes)} />
                 <Stat
                   label="First paper"
-                  value={view.summary.daysToFirst != null
-                    ? (view.summary.daysToFirst > 0 ? `in ${view.summary.daysToFirst} days` : 'today')
+                  value={shown.summary.daysToFirst != null
+                    ? (shown.summary.daysToFirst > 0 ? `in ${shown.summary.daysToFirst} days` : 'today')
                     : 'done'}
                   accent
                 />
-                <Stat label="Runs over" value={view.summary.span ? `${view.summary.span} days` : '—'} />
+                <Stat label="Runs over" value={shown.summary.span ? `${shown.summary.span} days` : '—'} />
               </div>
             </Card>
           )}
@@ -226,6 +283,27 @@ function Stat({ label, value, accent }: { label: string; value: string; accent?:
       </div>
     </div>
   )
+}
+
+/** Rebuilt from the papers left after any are dropped. */
+function summarise(exams: ExamsView['exams']): ExamsView['summary'] {
+  if (!exams.length) {
+    return { papers: 0, minutes: 0, first: null, last: null, daysToFirst: null, span: null }
+  }
+  const dates = exams.map((e) => e.date).sort()
+  const first = dates[0]
+  const last = dates[dates.length - 1]
+  const day = 86400000
+  const midnight = (iso: string) => new Date(iso + 'T00:00:00').getTime()
+  const today = midnight(new Date().toISOString().slice(0, 10))
+  return {
+    papers: exams.length,
+    minutes: exams.reduce((sum, e) => sum + e.minutes, 0),
+    first,
+    last,
+    daysToFirst: Math.max(0, Math.round((midnight(first) - today) / day)),
+    span: Math.round((midnight(last) - midnight(first)) / day) + 1,
+  }
 }
 
 function groupByDate(exams: ExamsView['exams']) {
