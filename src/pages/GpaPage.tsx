@@ -11,6 +11,7 @@ import {
 } from '@/lib/universities'
 import { suggest } from '@/lib/subjects'
 import { CountUp, Reveal, Stagger, StaggerItem } from '@/components/motion'
+import { ScaleBars } from '@/components/ScaleBars'
 import { Link } from '@/lib/router'
 
 const STORE = 'gpa.entries'
@@ -73,6 +74,8 @@ export function GpaPage() {
         </p>
       </motion.section>
 
+      <RunningVerdict o={rows.o} a={rows.a} />
+
       <div className="relative z-20 grid lg:grid-cols-2 gap-4 items-start">
         <Panel
           level="o" title="O Level / IGCSE" entries={rows.o} counted={oBest}
@@ -85,42 +88,7 @@ export function GpaPage() {
       </div>
 
       <Section title="Where you stand" tone="teal">
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {scales.map((s) => (
-          <Card key={s.key} className="p-5">
-            <div className="text-[11px] font-semibold uppercase tracking-[.09em] text-muted">{s.name}</div>
-            {s.combined != null ? (
-              <>
-                <div className={'font-display font-bold text-4xl leading-none mt-2 tabular-nums ' + TONES.amber.text}>
-                  <CountUp value={s.combined} decimals={2} />
-                </div>
-                {s.threshold != null && (
-                  <div className={'text-xs font-semibold mt-2 ' + (s.combined >= s.threshold ? 'text-emerald-400' : 'text-muted')}>
-                    {s.combined >= s.threshold ? 'Meets the ' : 'Below the '}
-                    {s.threshold.toFixed(2)} needed
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="flex items-baseline gap-5 mt-2">
-                <div>
-                  <div className={'font-display font-bold text-4xl leading-none tabular-nums ' + TONES.teal.text}>
-                    <CountUp value={s.o} decimals={2} />
-                  </div>
-                  <div className="text-[11px] text-muted mt-1">O Level</div>
-                </div>
-                <div>
-                  <div className={'font-display font-bold text-4xl leading-none tabular-nums ' + TONES.violet.text}>
-                    <CountUp value={s.a} decimals={2} />
-                  </div>
-                  <div className="text-[11px] text-muted mt-1">A Level</div>
-                </div>
-              </div>
-            )}
-            <p className="text-xs text-muted/90 mt-3 leading-relaxed">{s.note}</p>
-          </Card>
-        ))}
-      </div>
+        <ScaleBars scales={scales} />
       </Section>
 
       <Section title="University eligibility">
@@ -139,6 +107,40 @@ export function GpaPage() {
         admissions page before you rely on any of this.
       </p>
     </>
+  )
+}
+
+/** A running answer, pinned under the header while you work. */
+function RunningVerdict({ o, a }: { o: Entry[]; a: Entry[] }) {
+  const entered = [...o, ...a].filter((e) => e.grade).length
+  const open = useMemo(() => {
+    if (!entered) return 0
+    return UNIVERSITIES.reduce((n, uni) =>
+      n + uni.departments.filter((d) => departmentVerdict(uni, d, o, a).eligible).length, 0)
+  }, [o, a, entered])
+
+  return (
+    <AnimatePresence>
+      {entered > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+          className="sticky top-[68px] z-30 mb-4 rounded-2xl border border-line/80 bg-card/80 backdrop-blur-xl px-4 py-3 flex flex-wrap items-baseline gap-x-3 gap-y-1"
+        >
+          <span className="font-display font-bold text-2xl leading-none tabular-nums text-[#6EE7B7]">
+            <CountUp value={open} />
+          </span>
+          <span className="text-sm text-muted">
+            department{open === 1 ? '' : 's'} open to you across {UNIVERSITIES.length} universities
+          </span>
+          <span className="ml-auto text-[11px] text-muted/70">
+            {entered} subject{entered === 1 ? '' : 's'} entered
+          </span>
+        </motion.div>
+      )}
+    </AnimatePresence>
   )
 }
 
