@@ -3,6 +3,7 @@ import { ArrowRight, CalendarCheck, CalendarRange, Calculator, FileText, Graduat
 import { Card, TONES, Tone } from '@/components/ui'
 import { Link } from '@/lib/router'
 import { Reveal, Stagger, StaggerItem } from '@/components/motion'
+import { BoundaryLadder } from '@/components/BoundaryLadder'
 
 const TOOLS: {
   to: string
@@ -99,6 +100,8 @@ export function Home() {
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         className="mb-10 sm:mb-12"
       >
+        <div className="grid lg:grid-cols-[minmax(0,1fr)_268px] gap-10 lg:gap-14 items-center">
+        <div>
         <p className="text-[11px] font-semibold uppercase tracking-[.16em] text-[#60A5FA] mb-4">
           Edexcel and Cambridge · International A Level and IGCSE
         </p>
@@ -133,10 +136,28 @@ export function Home() {
           Built for students sitting Edexcel and Cambridge exams. Everything you enter stays in
           your own browser.
         </p>
+        </div>
+
+        <div className="hidden lg:block pb-8">
+          <BoundaryLadder />
+        </div>
+        </div>
       </motion.section>
 
+      <h2 className="font-display text-lg font-semibold tracking-tight mt-14 mb-4">
+        Six tools, all free
+      </h2>
+
+      <Stagger className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {TOOLS.map((tool) => (
+          <StaggerItem key={tool.to}>
+            <ToolCard {...tool} />
+          </StaggerItem>
+        ))}
+      </Stagger>
+
       <Reveal
-        className="mb-12 rounded-3xl border border-line/80 bg-card/40 backdrop-blur-xl p-6 sm:p-8"
+        className="mt-12 mb-12 rounded-3xl border border-line/80 bg-card/40 backdrop-blur-xl p-6 sm:p-8"
       >
         <h2 className="font-display text-lg font-semibold tracking-tight">How it fits together</h2>
         <p className="text-sm text-muted mt-1.5 max-w-2xl leading-relaxed">
@@ -156,17 +177,6 @@ export function Home() {
         </ol>
       </Reveal>
 
-      <h2 className="font-display text-lg font-semibold tracking-tight mb-4">
-        Six tools, all free
-      </h2>
-
-      <Stagger className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {TOOLS.map((tool) => (
-          <StaggerItem key={tool.to}>
-            <ToolCard {...tool} />
-          </StaggerItem>
-        ))}
-      </Stagger>
 
       <Reveal className="mt-10">
       <p className="text-xs text-muted/80 leading-relaxed max-w-2xl">

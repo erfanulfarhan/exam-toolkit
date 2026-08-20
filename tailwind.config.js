@@ -12,7 +12,7 @@ export default {
         // Cobalt sky. Navy is the ground rather than an accent, so cobalt and
         // the pale sky read as light against it; the slate carries secondary
         // text without competing with either.
-        bg: '#080d1c', card: '#101a33', line: '#24365c',
+        bg: '#0a1020', card: '#121c38', line: '#273a63',
         ink: '#eaf3fb', muted: '#8fa3bf',
         brand: { DEFAULT: '#0047AB', 2: '#82C8E5', 3: '#000080' },
         cobalt: { navy: '#000080', deep: '#0047AB', sky: '#82C8E5', slate: '#6D8196' },

@@ -42,7 +42,7 @@ function Shell() {
               <Layers size={17} />
             </span>
             <span className="font-display font-bold text-[15px] sm:text-base tracking-tight">
-              Exam Toolkit
+              ExamKit
             </span>
           </Link>
 
@@ -78,7 +78,7 @@ function Shell() {
       <footer className={'no-print border-t border-line/50 ' + (path === '/practice' ? 'mt-4' : 'mt-10')}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-7 text-xs text-muted flex flex-wrap gap-x-5 gap-y-2 justify-between">
           <p>
-            © {new Date().getFullYear()} Exam Toolkit. All rights reserved.
+            © {new Date().getFullYear()} ExamKit, built by Erfanul Hakim Farhan. All rights reserved.
             {' '}Unofficial. Check anything that matters against your statement of results.
           </p>
           <a

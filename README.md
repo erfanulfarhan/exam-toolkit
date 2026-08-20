@@ -1,9 +1,9 @@
-# Exam Toolkit
+# ExamKit
 
 Free revision tools for Edexcel International A Level and International GCSE
 students. No account, no ads, nothing to install.
 
-**Live:** https://edexcel-grade-calc.vercel.app
+**Live:** https://examkit.vercel.app
 
 ## What it does
 
@@ -56,4 +56,6 @@ Not affiliated with or endorsed by Pearson Edexcel or Cambridge Assessment.
 Grade boundary data is Pearson's, read from their published documents. Check
 anything that matters against your statement of results.
 
-Copyright (c) 2026. All rights reserved. See [LICENSE](LICENSE).
+Built by Erfanul Hakim Farhan.
+
+Copyright (c) 2026 Erfanul Hakim Farhan. All rights reserved. See [LICENSE](LICENSE).
