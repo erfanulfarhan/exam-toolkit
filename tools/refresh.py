@@ -29,6 +29,10 @@ IAL_PATTERNS = [
     'grade-boundaries-{month}-{year}-international-advanced-level.pdf',
 ]
 IGCSE_PATTERNS = [
+    # Pearson's current convention spells the qualification out in full, the
+    # same way it does for International A Level. Only the abbreviated form was
+    # listed here, so June 2026 sat published and unnoticed for weeks.
+    'grade-boundaries-{month}-{year}-international-gcse.pdf',
     '{yy}{mm:02d}-international-gcse-subject-grade-boundaries.pdf',
     '{yy}{mm:02d}-intgcse-9-1-subject-grade-boundaries.pdf',
     '{yy}{mm:02d}-intgcse-9-1-subject-grade-boundaries-v1.pdf',
