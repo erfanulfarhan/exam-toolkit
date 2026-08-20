@@ -1,0 +1,38 @@
+name: Point examkit.vercel.app at the latest deploy
+
+# examkit.vercel.app is a manual alias, not one of Vercel's automatic
+# production domains, so it stays pinned to whichever deployment it was last
+# assigned to. Without this it silently serves an old build: the day IGCSE
+# June 2026 landed, the deployment had it and the domain did not.
+on:
+  workflow_run:
+    workflows: ["Refresh grade boundaries"]
+    types: [completed]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  alias:
+    runs-on: ubuntu-latest
+    # Without a token there is nothing to do, and failing loudly every push
+    # would be noise; the step below says so once instead.
+    steps:
+      - name: Move the alias to the newest production deployment
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          if [ -z "$VERCEL_TOKEN" ]; then
+            echo "No VERCEL_TOKEN secret set, so examkit.vercel.app was left alone."
+            echo "Add one at Settings > Secrets > Actions to keep the domain current."
+            exit 0
+          fi
+          # Vercel needs a moment to finish building the deployment this push
+          # triggered before it can be aliased.
+          sleep 90
+          LATEST=$(npx --yes vercel@latest ls examkit --token "$VERCEL_TOKEN" --scope c-e113 2>/dev/null \
+            | grep -oE 'https://examkit-[a-z0-9]+-c-e113\.vercel\.app' | head -1)
+          if [ -z "$LATEST" ]; then echo "Could not find a deployment to alias."; exit 1; fi
+          echo "Aliasing $LATEST"
+          npx --yes vercel@latest alias set "$LATEST" examkit.vercel.app \
+            --token "$VERCEL_TOKEN" --scope c-e113
