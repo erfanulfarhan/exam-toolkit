@@ -31,13 +31,13 @@ body {
   pointer-events: none;
   animation: drift 42s ease-in-out infinite alternate;
   background:
-    radial-gradient(54rem 32rem at 10% -14%, rgba(130, 200, 229, 0.24), transparent 60%),
-    radial-gradient(48rem 30rem at 46% -12%, rgba(0, 71, 171, 0.55), transparent 58%),
-    radial-gradient(44rem 30rem at 94% -6%, rgba(0, 0, 128, 0.55), transparent 58%),
-    radial-gradient(40rem 28rem at 86% 34%, rgba(130, 200, 229, 0.14), transparent 60%),
-    radial-gradient(44rem 30rem at 4% 46%, rgba(0, 71, 171, 0.38), transparent 60%),
-    radial-gradient(46rem 30rem at 70% 76%, rgba(109, 129, 150, 0.20), transparent 62%),
-    radial-gradient(50rem 34rem at 14% 92%, rgba(0, 0, 128, 0.45), transparent 62%);
+    radial-gradient(54rem 32rem at 10% -14%, rgba(96, 165, 250, 0.32), transparent 60%),
+    radial-gradient(48rem 30rem at 46% -12%, rgba(167, 139, 250, 0.30), transparent 58%),
+    radial-gradient(44rem 30rem at 94% -6%, rgba(94, 234, 212, 0.24), transparent 58%),
+    radial-gradient(40rem 28rem at 86% 34%, rgba(251, 113, 133, 0.22), transparent 60%),
+    radial-gradient(44rem 30rem at 4% 46%, rgba(37, 99, 235, 0.34), transparent 60%),
+    radial-gradient(46rem 30rem at 70% 76%, rgba(252, 211, 77, 0.18), transparent 62%),
+    radial-gradient(50rem 34rem at 14% 92%, rgba(110, 231, 183, 0.20), transparent 62%);
 }
 
 /* Very fine noise keeps the large flat gradients from banding. */
@@ -51,7 +51,7 @@ body {
 }
 
 ::selection {
-  background: #0047AB;
+  background: #2563EB;
   color: #fff;
 }
 

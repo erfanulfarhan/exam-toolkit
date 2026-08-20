@@ -10,6 +10,7 @@ import {
   bestAcrossSittings,
 } from '@/lib/universities'
 import { suggest } from '@/lib/subjects'
+import { CountUp, Reveal, Stagger, StaggerItem } from '@/components/motion'
 import { Link } from '@/lib/router'
 
 const STORE = 'gpa.entries'
@@ -62,7 +63,7 @@ export function GpaPage() {
       >
         <h1 className="font-display text-3xl sm:text-[2.5rem] font-bold tracking-tight leading-[1.1]">
           Your grades as a{' '}
-          <span className="bg-gradient-to-r from-[#82C8E5] via-[#0047AB] to-[#000080] bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-[#6EE7B7] via-[#5EEAD4] to-[#22D3EE] bg-clip-text text-transparent">
             GPA
           </span>
         </h1>
@@ -90,8 +91,8 @@ export function GpaPage() {
             <div className="text-[11px] font-semibold uppercase tracking-[.09em] text-muted">{s.name}</div>
             {s.combined != null ? (
               <>
-                <div className={'font-display font-bold text-4xl leading-none mt-2 ' + TONES.amber.text}>
-                  {s.combined.toFixed(2)}
+                <div className={'font-display font-bold text-4xl leading-none mt-2 tabular-nums ' + TONES.amber.text}>
+                  <CountUp value={s.combined} decimals={2} />
                 </div>
                 {s.threshold != null && (
                   <div className={'text-xs font-semibold mt-2 ' + (s.combined >= s.threshold ? 'text-emerald-400' : 'text-muted')}>
@@ -103,14 +104,14 @@ export function GpaPage() {
             ) : (
               <div className="flex items-baseline gap-5 mt-2">
                 <div>
-                  <div className={'font-display font-bold text-4xl leading-none ' + TONES.teal.text}>
-                    {s.o.toFixed(2)}
+                  <div className={'font-display font-bold text-4xl leading-none tabular-nums ' + TONES.teal.text}>
+                    <CountUp value={s.o} decimals={2} />
                   </div>
                   <div className="text-[11px] text-muted mt-1">O Level</div>
                 </div>
                 <div>
-                  <div className={'font-display font-bold text-4xl leading-none ' + TONES.violet.text}>
-                    {s.a.toFixed(2)}
+                  <div className={'font-display font-bold text-4xl leading-none tabular-nums ' + TONES.violet.text}>
+                    <CountUp value={s.a} decimals={2} />
                   </div>
                   <div className="text-[11px] text-muted mt-1">A Level</div>
                 </div>
@@ -167,8 +168,8 @@ function Panel({
           </p>
         </div>
         <div className="text-right shrink-0">
-          <div className={'font-display font-bold text-3xl leading-none ' + TONES.teal.text}>
-            {counted.gpa.toFixed(2)}
+          <div className={'font-display font-bold text-3xl leading-none tabular-nums ' + TONES.teal.text}>
+            <CountUp value={counted.gpa} decimals={2} />
           </div>
           <div className="text-[10px] uppercase tracking-[.09em] text-muted mt-1">best {take}</div>
         </div>
@@ -337,15 +338,15 @@ function Eligibility({ o, a }: { o: Entry[]; a: Entry[] }) {
         <div className="mt-8 rounded-2xl border border-line bg-gradient-to-br from-[#0047AB]/[0.12] to-transparent p-5">
           <div className="flex flex-wrap items-baseline gap-x-8 gap-y-3">
             <div>
-              <div className={'font-display font-bold text-4xl leading-none ' + TONES.emerald.text}>
-                {totals.yes}
+              <div className={'font-display font-bold text-4xl leading-none tabular-nums ' + TONES.emerald.text}>
+                <CountUp value={totals.yes} />
               </div>
               <div className="text-[11px] text-muted mt-1.5">departments open to you</div>
             </div>
             {withinReach.length > 0 && (
               <div>
-                <div className={'font-display font-bold text-4xl leading-none ' + TONES.amber.text}>
-                  {withinReach.length}
+                <div className={'font-display font-bold text-4xl leading-none tabular-nums ' + TONES.amber.text}>
+                  <CountUp value={withinReach.length} />
                 </div>
                 <div className="text-[11px] text-muted mt-1.5">one requirement away</div>
               </div>

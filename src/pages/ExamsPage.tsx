@@ -58,7 +58,7 @@ export function ExamsPage() {
       >
         <h1 className="font-display text-3xl sm:text-[2.75rem] font-bold tracking-tight leading-[1.1] max-w-2xl">
           Your exam timetable,{' '}
-          <span className="bg-gradient-to-r from-[#82C8E5] to-[#0047AB] bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-[#FDA4AF] via-[#FB7185] to-[#E11D48] bg-clip-text text-transparent">
             just yours
           </span>
         </h1>

@@ -38,7 +38,7 @@ function Shell() {
       <header className="no-print sticky top-0 z-30 border-b border-line/50 bg-bg/70 backdrop-blur-xl">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
           <Link to="/" className="flex items-center gap-2.5 shrink-0">
-            <span className="grid place-items-center h-9 w-9 rounded-xl bg-gradient-to-br from-[#82C8E5] via-[#0047AB] to-[#000080] text-white shadow-lg shadow-[#0047AB]/40">
+            <span className="grid place-items-center h-9 w-9 rounded-xl bg-gradient-to-br from-[#60A5FA] via-[#A78BFA] to-[#FB7185] text-white shadow-lg shadow-[#7C3AED]/40">
               <Layers size={17} />
             </span>
             <span className="font-display font-bold text-[15px] sm:text-base tracking-tight">
@@ -54,7 +54,7 @@ function Shell() {
                 className={
                   'relative shrink-0 rounded-lg px-2.5 sm:px-3 h-8 inline-flex items-center text-xs sm:text-sm font-semibold transition-all ' +
                   (path === item.to
-                    ? 'bg-white/[.09] text-ink shadow-[0_0_0_1px_rgba(255,255,255,.06)_inset]'
+                    ? 'bg-white/[.10] text-ink shadow-[0_0_0_1px_rgba(255,255,255,.10)_inset]'
                     : 'text-muted hover:text-ink hover:bg-white/[.04]')
                 }
               >

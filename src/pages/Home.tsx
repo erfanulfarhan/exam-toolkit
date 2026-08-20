@@ -2,6 +2,7 @@ import { motion } from 'motion/react'
 import { ArrowRight, CalendarCheck, CalendarRange, Calculator, FileText, GraduationCap, LineChart } from 'lucide-react'
 import { Card, TONES, Tone } from '@/components/ui'
 import { Link } from '@/lib/router'
+import { Reveal, Stagger, StaggerItem } from '@/components/motion'
 
 const TOOLS: {
   to: string
@@ -54,7 +55,7 @@ const TOOLS: {
   },
   {
     to: '/log',
-    tone: 'rose',
+    tone: 'teal',
     icon: <LineChart size={20} />,
     title: 'Practice log',
     blurb:
@@ -98,12 +99,12 @@ export function Home() {
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
         className="mb-10 sm:mb-12"
       >
-        <p className="text-[11px] font-semibold uppercase tracking-[.16em] text-[#82C8E5] mb-4">
+        <p className="text-[11px] font-semibold uppercase tracking-[.16em] text-[#60A5FA] mb-4">
           Edexcel and Cambridge · International A Level and IGCSE
         </p>
         <h1 className="font-display text-4xl sm:text-[3.4rem] font-bold tracking-tight leading-[1.05] max-w-4xl">
           Every past paper,{' '}
-          <span className="reveal-line bg-[linear-gradient(110deg,#82C8E5,#0047AB,#000080,#6D8196,#82C8E5)] bg-clip-text text-transparent">
+          <span className="reveal-line bg-[linear-gradient(110deg,#60A5FA,#A78BFA,#5EEAD4,#FCD34D,#FB7185,#60A5FA)] bg-clip-text text-transparent">
             marked honestly
           </span>
         </h1>
@@ -116,13 +117,13 @@ export function Home() {
         <div className="flex flex-wrap items-center gap-3 mt-7">
           <Link
             to="/practice"
-            className="h-12 px-6 rounded-2xl bg-gradient-to-br from-[#0047AB] to-[#000080] text-white text-sm font-bold inline-flex items-center gap-2 hover:brightness-125 hover:-translate-y-0.5 transition-all shadow-lg shadow-[#0047AB]/40"
+            className="h-12 px-6 rounded-2xl bg-gradient-to-br from-[#60A5FA] to-[#7C3AED] text-white text-sm font-bold inline-flex items-center gap-2 hover:brightness-110 hover:-translate-y-0.5 transition-all shadow-lg shadow-[#7C3AED]/40"
           >
             Start practising <ArrowRight size={16} />
           </Link>
           <Link
             to="/gpa"
-            className="h-12 px-6 rounded-2xl border border-line text-sm font-bold inline-flex items-center gap-2 hover:border-[#82C8E5]/60 hover:-translate-y-0.5 transition-all"
+            className="h-12 px-6 rounded-2xl border border-line text-sm font-bold inline-flex items-center gap-2 hover:border-[#A78BFA]/60 hover:-translate-y-0.5 transition-all"
           >
             Where do my grades get me?
           </Link>
@@ -134,10 +135,7 @@ export function Home() {
         </p>
       </motion.section>
 
-      <motion.section
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.12, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      <Reveal
         className="mb-12 rounded-3xl border border-line/80 bg-card/40 backdrop-blur-xl p-6 sm:p-8"
       >
         <h2 className="font-display text-lg font-semibold tracking-tight">How it fits together</h2>
@@ -148,7 +146,7 @@ export function Home() {
         <ol className="grid sm:grid-cols-3 gap-5 sm:gap-6 mt-6">
           {STEPS.map((step, i) => (
             <li key={step.title} className="relative">
-              <span className="inline-grid place-items-center h-8 w-8 rounded-xl bg-[#0047AB]/20 border border-[#82C8E5]/30 text-[#82C8E5] font-display font-bold text-sm mb-3">
+              <span className="inline-grid place-items-center h-8 w-8 rounded-xl bg-[#7C3AED]/20 border border-[#A78BFA]/30 text-[#C4B5FD] font-display font-bold text-sm mb-3">
                 {i + 1}
               </span>
               <h3 className="font-semibold text-sm">{step.title}</h3>
@@ -156,29 +154,26 @@ export function Home() {
             </li>
           ))}
         </ol>
-      </motion.section>
+      </Reveal>
 
       <h2 className="font-display text-lg font-semibold tracking-tight mb-4">
         Six tools, all free
       </h2>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {TOOLS.map((tool, i) => (
-          <motion.div
-            key={tool.to}
-            initial={{ opacity: 0, y: 22, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ delay: 0.07 * i, type: 'spring', stiffness: 260, damping: 24 }}
-          >
+      <Stagger className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {TOOLS.map((tool) => (
+          <StaggerItem key={tool.to}>
             <ToolCard {...tool} />
-          </motion.div>
+          </StaggerItem>
         ))}
-      </div>
+      </Stagger>
 
-      <p className="text-xs text-muted/80 mt-10 leading-relaxed max-w-2xl">
+      <Reveal className="mt-10">
+      <p className="text-xs text-muted/80 leading-relaxed max-w-2xl">
         Built from Pearson's published grade boundary documents. Unofficial, so check anything that
         matters against your statement of results.
       </p>
+      </Reveal>
     </>
   )
 }

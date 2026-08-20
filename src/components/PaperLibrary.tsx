@@ -125,7 +125,7 @@ export function PaperLibrary({ onOpen }: { onOpen: OnOpen }) {
           className={
             'text-[11px] font-semibold px-2.5 py-1 rounded-lg border transition-colors ' +
             (withSolutions
-              ? 'bg-[#0047AB]/25 text-[#82C8E5] border-[#82C8E5]/40'
+              ? 'bg-[#059669]/20 text-[#6EE7B7] border-[#6EE7B7]/40'
               : 'text-muted border-line hover:text-ink')
           }
           title="Only show papers that have a mark scheme"
@@ -141,7 +141,7 @@ export function PaperLibrary({ onOpen }: { onOpen: OnOpen }) {
             const boardOpen = openBoard === board
             return (
               <div key={board}>
-                <Row depth={0} icon={<FolderOpen size={16} className="text-[#82C8E5]" />}
+                <Row depth={0} icon={<FolderOpen size={16} className="text-[#FCD34D]" />}
                   label={board} bold accent chevron={boardOpen}
                   onClick={() => { setOpenBoard(boardOpen ? '' : board); setOpenLevel(''); setOpenPrefix('') }} />
                 {boardOpen && levelsOf(board).map((level) => {
@@ -220,7 +220,7 @@ function Row({
       <span className={
         'flex-1 truncate ' +
         (bold ? 'font-display font-semibold ' : 'text-sm ') +
-        (accent ? 'text-[#82C8E5]' : '')
+        (accent ? 'text-[#FCD34D]' : '')
       }>{label}</span>
       {count != null && <span className="text-[11px] text-muted">{count}</span>}
     </button>
@@ -242,9 +242,9 @@ function PaperRow({
       style={{ paddingLeft: 8 + 4 * 20 }}
     >
       <span className="font-semibold text-sm flex-1 truncate">{pair.unit}</span>
-      <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-[#0047AB]/25 text-[#82C8E5] border border-[#0047AB]/50">QP</span>
+      <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-[#2563EB]/20 text-[#93C5FD] border border-[#60A5FA]/40">QP</span>
       {pair.ms
-        ? <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-[#82C8E5]/15 text-[#82C8E5] border border-[#82C8E5]/40">MS</span>
+        ? <span className="text-[11px] font-bold px-2 py-0.5 rounded-md bg-[#059669]/20 text-[#6EE7B7] border border-[#6EE7B7]/40">MS</span>
         : <span className="text-[11px] px-2 py-0.5 rounded-md text-muted/60 border border-line inline-flex items-center gap-1"><TriangleAlert size={10} /> no MS</span>}
     </button>
   )

@@ -5,6 +5,7 @@ import { Card, Meter, TONES } from '@/components/ui'
 import { Link } from '@/lib/router'
 import { GRADE_COLORS } from '@/lib/types'
 import { LogEntry, clearLog, loadLog, percentOf, removeEntry, trend, unitAverages } from '@/lib/log'
+import { CountUp, Reveal } from '@/components/motion'
 
 const SHORT: Record<string, string> = {
   January: 'Jan', 'May/June': 'May/June', 'October/November': 'Oct/Nov',
@@ -51,7 +52,7 @@ export function LogPage() {
       >
         <h1 className="font-display text-3xl sm:text-[2.5rem] font-bold tracking-tight leading-[1.1]">
           Your practice{' '}
-          <span className="bg-gradient-to-r from-[#82C8E5] via-[#0047AB] to-[#000080] bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-[#67E8F9] via-[#22D3EE] to-[#0891B2] bg-clip-text text-transparent">
             log
           </span>
         </h1>
@@ -94,13 +95,17 @@ export function LogPage() {
                 Oldest to newest, for papers whose total is known.
               </p>
               <div className="mt-5 flex items-end gap-1.5 h-40">
-                {scored.slice(-16).map(({ entry, percent }) => (
+                {scored.slice(-16).map(({ entry, percent }, i) => (
                   <div key={entry.key} className="flex-1 min-w-0 flex flex-col items-center gap-1.5 group">
                     <span className="text-[10px] font-semibold tabular-nums text-muted group-hover:text-ink transition-colors">
                       {percent}
                     </span>
-                    <div
-                      className="w-full rounded-t-md bg-gradient-to-t from-[#0047AB]/70 to-[#82C8E5] min-h-[3px]"
+                    <motion.div
+                      className="w-full rounded-t-md bg-gradient-to-t from-[#0047AB]/70 to-[#82C8E5] min-h-[3px] origin-bottom"
+                      initial={{ scaleY: 0 }}
+                      whileInView={{ scaleY: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.55, delay: 0.03 * i, ease: [0.22, 1, 0.36, 1] }}
                       style={{ height: `${Math.max(3, percent)}%` }}
                       title={`${entry.subject} ${entry.unit} · ${sitting(entry)} · ${percent}%`}
                     />
@@ -189,10 +194,15 @@ export function LogPage() {
 }
 
 function Stat({ label, value, tone }: { label: string; value: string; tone: 'teal' | 'violet' | 'amber' }) {
+  // Percentages carry their sign; plain counts do not.
+  const numeric = Number(value.replace('%', ''))
+  const suffix = value.endsWith('%') ? '%' : ''
   return (
     <Card className="p-5">
       <div className="text-[11px] font-semibold uppercase tracking-[.09em] text-muted">{label}</div>
-      <div className={'font-display font-bold text-3xl leading-none mt-2 ' + TONES[tone].text}>{value}</div>
+      <div className={'font-display font-bold text-3xl leading-none mt-2 tabular-nums ' + TONES[tone].text}>
+        {Number.isFinite(numeric) ? <><CountUp value={numeric} />{suffix}</> : value}
+      </div>
     </Card>
   )
 }
